@@ -35,7 +35,7 @@ class TokenType(Enum):
     CLASS = "CLASS"
     ELSE = "ELSE"
     FALSE = "FALSE"
-    FUN = "FUN"
+    DEF = "DEF"
     FOR = "FOR"
     IF = "IF"
     NIL = "NIL"

@@ -15,7 +15,7 @@ KEYWORDS = {
     "else": TokenType.ELSE,
     "false": TokenType.FALSE,
     "for": TokenType.FOR,
-    "fun": TokenType.FUN,
+    "def": TokenType.DEF,
     "if": TokenType.IF,
     "nil": TokenType.NIL,
     "or": TokenType.OR,
