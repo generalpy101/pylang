@@ -3,11 +3,13 @@ import sys
 from logger import Logger
 from scanner import Scanner
 
+
 def run(source_code: str):
     lexical_scanner = Scanner(source_code=source_code)
     tokens = lexical_scanner.scan_tokens()
-    
+
     print(tokens)
+
 
 def run_file(file_path: str):
     with open(file_path, "r") as file:

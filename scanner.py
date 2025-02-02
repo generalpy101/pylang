@@ -1,10 +1,10 @@
-from typing import List
 import string
+from typing import List
 
+from errors import ErrorType
+from logger import Logger
 from token_type import TokenType
 from tokens import Token
-from logger import Logger
-from errors import ErrorType
 
 WHITESPACES_TO_IGNORE = [" ", "\t", "\r"]
 STRING_IDENTIFIERS = ['"']
@@ -46,7 +46,7 @@ class Scanner:
             Token(token_type=TokenType.EOF, lexeme="", literal=None, line=self.line)
         )
         return self.tokens
-    
+
     def _scan_token(self):
         element = self._advance()
         if element == "(":
@@ -121,7 +121,7 @@ class Scanner:
         return char
 
     def _add_token(self, token_type: TokenType, literal=None) -> None:
-        code = self.source_code[self.start:self.current]
+        code = self.source_code[self.start : self.current]
         self.tokens.append(
             Token(token_type=token_type, lexeme=code, literal=literal, line=self.line)
         )
@@ -164,7 +164,7 @@ class Scanner:
         self._advance()
 
         # Trim quotes
-        value = self.source_code[self.start + 1:self.current - 1]
+        value = self.source_code[self.start + 1 : self.current - 1]
         self._add_token(token_type=TokenType.STRING, literal=value)
 
     def _handle_numbers(self):
@@ -177,7 +177,7 @@ class Scanner:
             while self._peek().isdigit():
                 self._advance()
 
-        number = float(self.source_code[self.start:self.current])
+        number = float(self.source_code[self.start : self.current])
 
         self._add_token(token_type=TokenType.NUMBER, literal=number)
 
@@ -190,7 +190,7 @@ class Scanner:
     def _handle_identifiers(self):
         while self._is_alphanumeric(self._peek()):
             self._advance()
-        code = self.source_code[self.start:self.current]
+        code = self.source_code[self.start : self.current]
         token_type = KEYWORDS.get(code)
 
         if token_type == None:
