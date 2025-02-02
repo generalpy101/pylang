@@ -14,7 +14,7 @@ class AstPrinter(ExprVisitor):
         return f"{left} {expr.operator.lexeme} {right}"
 
     def visit_grouping(self, expr: Grouping):
-        return f"(group + {expr.accept(expr.expression)})"
+        return f"(group {expr.expression.accept(self)})"
 
     def visit_literal(self, expr: Literal):
         return str(expr.value)
@@ -27,7 +27,7 @@ class AstPrinter(ExprVisitor):
 if __name__ == "__main__":
     # 11 - (-10)
     bin_exp = Binary(
-        left=Literal(value=11),
+        left=Grouping(expression=Literal(value=11)),
         operator=Token(token_type=TokenType.MINUS, lexeme="-", literal=None, line=0),
         right=Unary(
             operator=Token(
