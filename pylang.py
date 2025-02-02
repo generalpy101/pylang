@@ -1,6 +1,6 @@
 import sys
 
-from logger import Logger
+from utils.logger import Logger
 from scanner import Scanner
 
 

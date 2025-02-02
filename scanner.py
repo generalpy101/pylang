@@ -2,7 +2,7 @@ import string
 from typing import List
 
 from errors import ErrorType
-from logger import Logger
+from utils.logger import Logger
 from token_type import TokenType
 from tokens import Token
 
