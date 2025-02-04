@@ -1,14 +1,24 @@
 import sys
+from parser import Parser
+from typing import List
 
-from utils.logger import Logger
+from ast_printer import AstPrinter
+from expr import Expr
 from scanner import Scanner
+from tokens import Token
+from utils.logger import Logger
 
 
 def run(source_code: str):
-    lexical_scanner = Scanner(source_code=source_code)
-    tokens = lexical_scanner.scan_tokens()
+    lexical_scanner: Scanner = Scanner(source_code=source_code)
+    tokens: List[Token] = lexical_scanner.scan_tokens()
+    parser: Parser = Parser(tokens=tokens)
+    expression: Expr | None = parser.parse()
 
-    print(tokens)
+    if expression is None:
+        return
+
+    print(AstPrinter().print(expression))
 
 
 def run_file(file_path: str):
@@ -24,7 +34,7 @@ def run_repl():
     except KeyboardInterrupt:
         print("\nExiting...")
     except Exception as e:
-        Logger.error("Test", 69, e)
+        print(e)
 
 
 if __name__ == "__main__":

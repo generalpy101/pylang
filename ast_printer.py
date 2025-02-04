@@ -11,7 +11,7 @@ class AstPrinter(ExprVisitor):
         left = expr.left.accept(self)
         right = expr.right.accept(self)
 
-        return f"{left} {expr.operator.lexeme} {right}"
+        return f"({expr.operator.lexeme} {left} {right})"
 
     def visit_grouping(self, expr: Grouping):
         return f"(group {expr.expression.accept(self)})"
