@@ -1,5 +1,8 @@
+from typing import List
+
 from errors import ErrorType
 from expr import Binary, Expr, ExprVisitor, Grouping, Literal, Unary
+from stmt import ExpressionStmt, PrintStmt, Stmt, StmtVisitor
 from token_type import TokenType
 from tokens import Token
 from utils.logger import Logger
@@ -12,14 +15,22 @@ class InterpreterRuntimeError(Exception):
         super().__init__(message)
 
 
-class Interpreter(ExprVisitor):
-    def interpret(self, expr: Expr) -> str | None:
+class Interpreter(ExprVisitor, StmtVisitor):
+    def interpret(self, stmts: List[Stmt]) -> None:
         try:
-            value = self._evaluate(expr)
-            return self._stringify(value)
+            for statement in stmts:
+                self._execute(statement)
         except InterpreterRuntimeError as e:
             Logger.error(ErrorType.RuntimeError, e.token.line, e.message)
-            return None
+            # Raise the error to the caller to exit the program
+            raise e
+
+    def visit_expression_stmt(self, stmt: ExpressionStmt) -> None:
+        self._evaluate(stmt.expression)
+
+    def visit_print_stmt(self, stmt: PrintStmt) -> None:
+        value = self._evaluate(stmt.expression)
+        print(self._stringify(value))
 
     def visit_literal(self, expr: Literal) -> object:
         return expr.value
@@ -137,3 +148,6 @@ class Interpreter(ExprVisitor):
             token=operator,
             message=f"Operands must be numbers for operator {operator.lexeme}",
         )
+
+    def _execute(self, stmt: Stmt) -> None:
+        stmt.accept(self)

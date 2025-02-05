@@ -2,54 +2,42 @@ import sys
 from parser import Parser
 from typing import List
 
-from expr import Expr
-from interpreter import Interpreter
+from errors import ErrorType
+from interpreter import Interpreter, InterpreterRuntimeError
 from scanner import Scanner
+from stmt import Stmt
 from tokens import Token
 
 
-def run(source_code: str):
-    lexical_scanner: Scanner = Scanner(source_code=source_code)
-    tokens: List[Token] = lexical_scanner.scan_tokens()
-    parser: Parser = Parser(tokens=tokens)
-    expression: Expr | None = parser.parse()
+def run(source_code: str, is_repl: bool = False):
+    try:
+        lexical_scanner: Scanner = Scanner(source_code=source_code)
+        tokens: List[Token] = lexical_scanner.scan_tokens()
+        parser: Parser = Parser(tokens=tokens)
+        expressions: List[Stmt] | None = parser.parse()
 
-    if expression is None:
-        return
+        if expressions is None:
+            if not is_repl:
+                exit(64)
+            return
 
-    interpreter: Interpreter = Interpreter()
-    evaluated_result: str | None = interpreter.interpret(expr=expression)
-
-    if evaluated_result is None:
-        return
-
-    print(evaluated_result)
+        interpreter: Interpreter = Interpreter()
+        interpreter.interpret(stmts=expressions)
+    except InterpreterRuntimeError as e:
+        if not is_repl:
+            exit(70)
 
 
 def run_file(file_path: str):
     with open(file_path, "r") as file:
-        lexical_scanner: Scanner = Scanner(source_code=file.read())
-        tokens: List[Token] = lexical_scanner.scan_tokens()
-        parser: Parser = Parser(tokens=tokens)
-        expression: Expr | None = parser.parse()
-
-        if expression is None:
-            exit(64)
-
-        interpreter: Interpreter = Interpreter()
-        evaluated_result: str | None = interpreter.interpret(expr=expression)
-
-        if evaluated_result is None:
-            exit(70)
-
-        print(evaluated_result)
+        run(source_code=file.read())
 
 
 def run_repl():
     try:
         while True:
             command = input(">> ")
-            run(source_code=command)
+            run(source_code=command, is_repl=True)
     except KeyboardInterrupt:
         print("\nExiting...")
     except Exception as e:

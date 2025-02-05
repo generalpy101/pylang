@@ -2,6 +2,7 @@ from typing import List
 
 from errors import ErrorType
 from expr import Binary, Expr, Literal, Unary
+from stmt import ExpressionStmt, PrintStmt, Stmt
 from token_type import TokenType
 from tokens import Token
 from utils.logger import Logger
@@ -24,6 +25,14 @@ class Parser:
                 | primary ;
     primary        → NUMBER | STRING | "true" | "false" | "nil"
                 | "(" expression ")" ;
+
+    program        → statement* EOF ;
+
+    statement      → exprStmt
+                | printStmt ;
+
+    exprStmt       → expression ";" ;
+    printStmt      → "print" expression ";" ;
     """
 
     def __init__(self, tokens: List[Token]) -> None:
@@ -32,12 +41,30 @@ class Parser:
 
     def parse(self) -> Expr | None:
         try:
-            return self._expression()
+            statements = []
+            while not self._is_end():
+                statements.append(self._statement())
+            return statements
         except ParserError:
             return None
         except Exception as e:
             Logger.error(ErrorType.SyntaxError, self._peek().line, str(e))
             return None
+
+    def _statement(self) -> Stmt:
+        if self._match(TokenType.PRINT):
+            return self._print_statement()
+        return self._expression_statement()
+
+    def _print_statement(self) -> Stmt:
+        value = self._expression()
+        self._consume(TokenType.SEMICOLON, "Expect ';' after value.")
+        return PrintStmt(expression=value)
+
+    def _expression_statement(self) -> Stmt:
+        value = self._expression()
+        self._consume(TokenType.SEMICOLON, "Expect ';' after expression.")
+        return ExpressionStmt(expression=value)
 
     def _expression(self) -> Expr:
         return self._equality()

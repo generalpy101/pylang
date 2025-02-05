@@ -86,6 +86,15 @@ def main():
         },
     )
 
+    define_ast(
+        output_directory=output_dir,
+        base_name="Stmt",
+        types={
+            "Expression": (("expression", "Expr"),),
+            "Print": (("expression", "Expr"),),
+        },
+    )
+
 
 if __name__ == "__main__":
     main()
