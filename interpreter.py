@@ -1,21 +1,20 @@
 from typing import List
 
-from errors import ErrorType
-from expr import Binary, Expr, ExprVisitor, Grouping, Literal, Unary
-from stmt import ExpressionStmt, PrintStmt, Stmt, StmtVisitor
+from environment import Environment
+from errors import ErrorType, InterpreterRuntimeError
+from expr import (Assign, Binary, Expr, ExprVisitor, Grouping, Literal, Unary,
+                  Variable)
+from stmt import (BlockStmt, ExpressionStmt, PrintStmt, Stmt, StmtVisitor,
+                  VarStmt)
 from token_type import TokenType
 from tokens import Token
 from utils.logger import Logger
 
 
-class InterpreterRuntimeError(Exception):
-    def __init__(self, token: Token, message: str) -> None:
-        self.token = token
-        self.message = message
-        super().__init__(message)
-
-
 class Interpreter(ExprVisitor, StmtVisitor):
+    def __init__(self) -> None:
+        self.environment = Environment()
+
     def interpret(self, stmts: List[Stmt]) -> None:
         try:
             for statement in stmts:
@@ -24,6 +23,25 @@ class Interpreter(ExprVisitor, StmtVisitor):
             Logger.error(ErrorType.RuntimeError, e.token.line, e.message)
             # Raise the error to the caller to exit the program
             raise e
+
+    def visit_block_stmt(self, expr: BlockStmt):
+        self._execute_block(
+            expr.statements, Environment(enclosing_scope=self.environment)
+        )
+        return None
+
+    def visit_var_stmt(self, expr: VarStmt):
+        value = None
+        if expr.initializer is not None:
+            value = self._evaluate(expr.initializer)
+
+        self.environment.define(expr.name.lexeme, value)
+        return None
+
+    def visit_assign(self, expr: Assign):
+        value = self._evaluate(expr.value)
+        self.environment.assign(expr.name, value)
+        return value
 
     def visit_expression_stmt(self, stmt: ExpressionStmt) -> None:
         self._evaluate(stmt.expression)
@@ -48,6 +66,9 @@ class Interpreter(ExprVisitor, StmtVisitor):
             return not self._is_truthy(right)
 
         return None
+
+    def visit_variable(self, expr: Variable):
+        return self.environment.get(expr.name)
 
     def visit_binary(self, expr: Binary) -> object | None:
         left = self._evaluate(expr.left)
@@ -151,3 +172,12 @@ class Interpreter(ExprVisitor, StmtVisitor):
 
     def _execute(self, stmt: Stmt) -> None:
         stmt.accept(self)
+
+    def _execute_block(self, stmts: List[Stmt], environment: Environment) -> None:
+        previous = self.environment
+        try:
+            self.environment = environment
+            for statement in stmts:
+                self._execute(statement)
+        finally:
+            self.environment = previous

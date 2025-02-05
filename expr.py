@@ -8,6 +8,10 @@ from tokens import Token
 class ExprVisitor(ABC):
 
     @abstractmethod
+    def visit_assign(self, expr: "Assign"):
+        pass
+
+    @abstractmethod
     def visit_binary(self, expr: "Binary"):
         pass
 
@@ -23,12 +27,25 @@ class ExprVisitor(ABC):
     def visit_unary(self, expr: "Unary"):
         pass
 
+    @abstractmethod
+    def visit_variable(self, expr: "Variable"):
+        pass
+
 
 # Base Expr class
 class Expr(ABC):
     @abstractmethod
     def accept(self, visitor: ExprVisitor):
         pass
+
+
+@dataclass
+class Assign(Expr):
+    name: Token
+    value: Expr
+
+    def accept(self, visitor: ExprVisitor):
+        return visitor.visit_assign(self)
 
 
 @dataclass
@@ -64,3 +81,11 @@ class Unary(Expr):
 
     def accept(self, visitor: ExprVisitor):
         return visitor.visit_unary(self)
+
+
+@dataclass
+class Variable(Expr):
+    name: Token
+
+    def accept(self, visitor: ExprVisitor):
+        return visitor.visit_variable(self)

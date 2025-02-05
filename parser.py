@@ -1,8 +1,8 @@
 from typing import List
 
 from errors import ErrorType
-from expr import Binary, Expr, Literal, Unary
-from stmt import ExpressionStmt, PrintStmt, Stmt
+from expr import Assign, Binary, Expr, Literal, Unary, Variable
+from stmt import BlockStmt, ExpressionStmt, PrintStmt, Stmt, VarStmt
 from token_type import TokenType
 from tokens import Token
 from utils.logger import Logger
@@ -16,7 +16,9 @@ class Parser:
     """
     Parser for the lox language
     Grammar used is:
-    expression     → equality ;
+    expression     → assignment ;
+    assignment     → IDENTIFIER "=" assignment
+                | equality ;
     equality       → comparison ( ( "!=" | "==" ) comparison )* ;
     comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
     term           → factor ( ( "-" | "+" ) factor )* ;
@@ -24,13 +26,16 @@ class Parser:
     unary          → ( "!" | "-" ) unary
                 | primary ;
     primary        → NUMBER | STRING | "true" | "false" | "nil"
-                | "(" expression ")" ;
+                | "(" expression ")" | IDENTIFIER ;
 
-    program        → statement* EOF ;
-
+    program        → declaration* EOF ;
+    declaration    → varDecl
+                | statement ;
     statement      → exprStmt
-                | printStmt ;
-
+               | printStmt
+               | block ;
+    block          → "{" declaration* "}" ;
+    varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
     exprStmt       → expression ";" ;
     printStmt      → "print" expression ";" ;
     """
@@ -43,7 +48,9 @@ class Parser:
         try:
             statements = []
             while not self._is_end():
-                statements.append(self._statement())
+                evaluated_stmt = self._declaration()
+                if evaluated_stmt is not None:
+                    statements.append(evaluated_stmt)
             return statements
         except ParserError:
             return None
@@ -51,10 +58,42 @@ class Parser:
             Logger.error(ErrorType.SyntaxError, self._peek().line, str(e))
             return None
 
+    def _declaration(self) -> Stmt:
+        try:
+            if self._match(TokenType.VAR):
+                return self._var_declaration()
+            return self._statement()
+        except ParserError:
+            self._synchronize()
+            return None
+
+    def _var_declaration(self) -> Stmt:
+        name = self._consume(TokenType.IDENTIFIER, "Expected variable name.")
+
+        initializer = None
+        if self._match(TokenType.EQUAL):
+            initializer = self._expression()
+
+        self._consume(TokenType.SEMICOLON, "Expect ';' after variable declaration.")
+        return VarStmt(name=name, initializer=initializer)
+
     def _statement(self) -> Stmt:
         if self._match(TokenType.PRINT):
             return self._print_statement()
+        if self._match(TokenType.LEFT_BRACE):
+            return BlockStmt(statements=self._block())
         return self._expression_statement()
+
+    def _block(self) -> List[Stmt]:
+        statements = []
+
+        while (
+            not self._peek().token_type == TokenType.RIGHT_BRACE and not self._is_end()
+        ):
+            statements.append(self._declaration())
+
+        self._consume(TokenType.RIGHT_BRACE, "Expect '}' after block.")
+        return statements
 
     def _print_statement(self) -> Stmt:
         value = self._expression()
@@ -67,7 +106,24 @@ class Parser:
         return ExpressionStmt(expression=value)
 
     def _expression(self) -> Expr:
-        return self._equality()
+        return self._assignment()
+
+    def _assignment(self) -> Expr:
+        expr = self._equality()
+
+        if self._match(TokenType.EQUAL):
+            equals = self._previous()
+            value = self._assignment()
+
+            if isinstance(expr, Variable):
+                name = expr.name
+                return Assign(name=name, value=value)
+
+            Logger.error(
+                ErrorType.SyntaxError, equals.line, "Invalid assignment target."
+            )
+
+        return expr
 
     def _equality(self) -> Expr:
         expr = self._comparison()
@@ -138,6 +194,9 @@ class Parser:
             self._consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.")
             return expr
 
+        if self._match(TokenType.IDENTIFIER):
+            return Variable(self._previous())
+
         Logger.error(ErrorType.SyntaxError, self._peek().line, "Expected expression.")
 
     def _consume(self, token_type: TokenType, message: str) -> Token:
@@ -165,7 +224,7 @@ class Parser:
 
             if self._peek().token_type in [
                 TokenType.CLASS,
-                TokenType.FUN,
+                TokenType.DEF,
                 TokenType.VAR,
                 TokenType.FOR,
                 TokenType.IF,

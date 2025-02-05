@@ -79,10 +79,12 @@ def main():
         output_directory=output_dir,
         base_name="Expr",
         types={
+            "Assign": (("name", "Token"), ("value", "Expr")),
             "Binary": (("left", "Expr"), ("operator", "Token"), ("right", "Expr")),
             "Grouping": (("expression", "Expr"),),
             "Literal": (("value", "object"),),
             "Unary": (("operator", "Token"), ("right", "Expr")),
+            "Variable": (("name", "Token"),),
         },
     )
 
@@ -90,8 +92,10 @@ def main():
         output_directory=output_dir,
         base_name="Stmt",
         types={
+            "Block": (("statements", "List[Stmt]"),),
             "Expression": (("expression", "Expr"),),
             "Print": (("expression", "Expr"),),
+            "Var": (("name", "Token"), ("initializer", "Expr")),
         },
     )
 

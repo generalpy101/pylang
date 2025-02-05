@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import List
 
 from expr import Expr
+from tokens import Token
 
 
 # Visitor interface
@@ -13,6 +15,14 @@ class StmtVisitor(ABC):
 
     @abstractmethod
     def visit_print_stmt(self, expr: "PrintStmt"):
+        pass
+
+    @abstractmethod
+    def visit_var_stmt(self, expr: "VarStmt"):
+        pass
+
+    @abstractmethod
+    def visit_block_stmt(self, expr: "BlockStmt"):
         pass
 
 
@@ -37,3 +47,20 @@ class PrintStmt(Stmt):
 
     def accept(self, visitor: StmtVisitor):
         return visitor.visit_print_stmt(self)
+
+
+@dataclass
+class VarStmt(Stmt):
+    name: Token
+    initializer: Expr
+
+    def accept(self, visitor: StmtVisitor):
+        return visitor.visit_var_stmt(self)
+
+
+@dataclass
+class BlockStmt(Stmt):
+    statements: List[Stmt]
+
+    def accept(self, visitor: StmtVisitor):
+        return visitor.visit_block_stmt(self)
