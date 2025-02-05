@@ -2,11 +2,10 @@ import sys
 from parser import Parser
 from typing import List
 
-from ast_printer import AstPrinter
 from expr import Expr
+from interpreter import Interpreter
 from scanner import Scanner
 from tokens import Token
-from utils.logger import Logger
 
 
 def run(source_code: str):
@@ -18,12 +17,32 @@ def run(source_code: str):
     if expression is None:
         return
 
-    print(AstPrinter().print(expression))
+    interpreter: Interpreter = Interpreter()
+    evaluated_result: str | None = interpreter.interpret(expr=expression)
+
+    if evaluated_result is None:
+        return
+
+    print(evaluated_result)
 
 
 def run_file(file_path: str):
     with open(file_path, "r") as file:
-        run(source_code=file.read())
+        lexical_scanner: Scanner = Scanner(source_code=file.read())
+        tokens: List[Token] = lexical_scanner.scan_tokens()
+        parser: Parser = Parser(tokens=tokens)
+        expression: Expr | None = parser.parse()
+
+        if expression is None:
+            exit(64)
+
+        interpreter: Interpreter = Interpreter()
+        evaluated_result: str | None = interpreter.interpret(expr=expression)
+
+        if evaluated_result is None:
+            exit(70)
+
+        print(evaluated_result)
 
 
 def run_repl():

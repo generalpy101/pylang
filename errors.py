@@ -4,3 +4,4 @@ from enum import Enum
 class ErrorType(Enum):
     LexicalError = "LexicalError"
     SyntaxError = "SyntaxError"
+    RuntimeError = "RuntimeError"

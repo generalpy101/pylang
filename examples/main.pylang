@@ -1,4 +1,2 @@
-var a = 10
-if a == 10 {
-    print a
-}
+1 + 2;
+"abc" == "def";
