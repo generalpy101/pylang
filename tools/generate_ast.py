@@ -83,6 +83,7 @@ def main():
             "Binary": (("left", "Expr"), ("operator", "Token"), ("right", "Expr")),
             "Grouping": (("expression", "Expr"),),
             "Literal": (("value", "object"),),
+            "Logical": (("left", "Expr"), ("operator", "Token"), ("right", "Expr")),
             "Unary": (("operator", "Token"), ("right", "Expr")),
             "Variable": (("name", "Token"),),
         },
@@ -92,10 +93,12 @@ def main():
         output_directory=output_dir,
         base_name="Stmt",
         types={
-            "Block": (("statements", "List[Stmt]"),),
-            "Expression": (("expression", "Expr"),),
-            "Print": (("expression", "Expr"),),
-            "Var": (("name", "Token"), ("initializer", "Expr")),
+            "BlockStmt": (("statements", "List[Stmt]"),),
+            "ExpressionStmt": (("expression", "Expr"),),
+            "IfStmt": (("condition", "Expr"), ("then_branch", "Stmt"), ("else_branch", "Stmt")),
+            "PrintStmt": (("expression", "Expr"),),
+            "VarStmt": (("name", "Token"), ("initializer", "Expr")),
+            "WhileStmt": (("condition", "Expr"), ("body", "Stmt")),
         },
     )
 

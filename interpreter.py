@@ -2,10 +2,10 @@ from typing import List
 
 from environment import Environment
 from errors import ErrorType, InterpreterRuntimeError
-from expr import (Assign, Binary, Expr, ExprVisitor, Grouping, Literal, Unary,
+from expr import (Assign, Binary, Expr, ExprVisitor, Grouping, Literal, Logical, Unary,
                   Variable)
-from stmt import (BlockStmt, ExpressionStmt, PrintStmt, Stmt, StmtVisitor,
-                  VarStmt)
+from stmt import (BlockStmt, ExpressionStmt, IfStmt, PrintStmt, Stmt, StmtVisitor,
+                  VarStmt, WhileStmt)
 from token_type import TokenType
 from tokens import Token
 from utils.logger import Logger
@@ -45,6 +45,14 @@ class Interpreter(ExprVisitor, StmtVisitor):
 
     def visit_expression_stmt(self, stmt: ExpressionStmt) -> None:
         self._evaluate(stmt.expression)
+    
+    def visit_if_stmt(self, expr: IfStmt):
+        if self._is_truthy(self._evaluate(expr.condition)):
+            self._execute(expr.then_branch)
+        elif expr.else_branch is not None:
+            self._execute(expr.else_branch)
+        
+        return None
 
     def visit_print_stmt(self, stmt: PrintStmt) -> None:
         value = self._evaluate(stmt.expression)
@@ -65,6 +73,24 @@ class Interpreter(ExprVisitor, StmtVisitor):
         elif expr.operator.token_type == TokenType.BANG:
             return not self._is_truthy(right)
 
+        return None
+    
+    def visit_logical(self, expr: Logical):
+        left = self._evaluate(expr.left)
+        
+        if expr.operator.token_type == TokenType.OR:
+            if self._is_truthy(left):
+                return left
+        else:
+            if not self._is_truthy(left):
+                return left
+        
+        return self._evaluate(expr.right)
+    
+    def visit_while_stmt(self, expr: WhileStmt):
+        while self._is_truthy(self._evaluate(expr.condition)):
+            self._execute(expr.body)
+        
         return None
 
     def visit_variable(self, expr: Variable):
