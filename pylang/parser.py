@@ -1,8 +1,9 @@
 from typing import List
 
 from errors import ErrorType
-from expr import Assign, Binary, Expr, Literal, Unary, Variable, Logical
-from stmt import BlockStmt, ExpressionStmt, PrintStmt, Stmt, VarStmt, IfStmt, WhileStmt
+from expr import Assign, Binary, Expr, Literal, Logical, Unary, Variable
+from stmt import (BlockStmt, ExpressionStmt, IfStmt, PrintStmt, Stmt, VarStmt,
+                  WhileStmt)
 from token_type import TokenType
 from tokens import Token
 from utils.logger import Logger
@@ -116,12 +117,12 @@ class Parser:
         value = self._expression()
         self._consume(TokenType.SEMICOLON, "Expect ';' after value.")
         return PrintStmt(expression=value)
-    
+
     def _for_statement(self) -> Stmt:
-        '''
+        """
         This is C style for loop but in backend it is just a syntactic sugar
         for the while loop. We will desugar it to while loop.
-        '''
+        """
         self._consume(TokenType.LEFT_PAREN, "Expect '(' after 'for'.")
 
         # Handle initialiser part
@@ -131,35 +132,29 @@ class Parser:
             initializer = self._var_declaration()
         else:
             initializer = self._expression_statement()
-            
+
         # Handle condition part
         condition = None
         if self._peek().token_type != TokenType.SEMICOLON:
             condition = self._expression()
         self._consume(TokenType.SEMICOLON, "Expect ';' after loop condition.")
-        
+
         # Handle increment part
         increment = None
         if not self._peek().token_type == TokenType.RIGHT_PAREN:
             increment = self._expression()
         self._consume(TokenType.RIGHT_PAREN, "Expect ')' after for clauses.")
-        
+
         body = self._statement()
         if increment is not None:
-            body = BlockStmt(
-                statements=[body, ExpressionStmt(expression=increment)]
-            )
+            body = BlockStmt(statements=[body, ExpressionStmt(expression=increment)])
         if condition is None:
             condition = Literal(True)
         body = WhileStmt(condition=condition, body=body)
         if initializer is not None:
-            body = BlockStmt(
-                statements=[
-                    initializer, body
-                ]
-            )
-        return body 
-    
+            body = BlockStmt(statements=[initializer, body])
+        return body
+
     def _if_statement(self) -> Stmt:
         self._consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.")
         condition = self._expression()
@@ -170,7 +165,9 @@ class Parser:
         if self._match(TokenType.ELSE):
             else_branch = self._statement()
 
-        return IfStmt(condition=condition, then_branch=then_branch, else_branch=else_branch)
+        return IfStmt(
+            condition=condition, then_branch=then_branch, else_branch=else_branch
+        )
 
     def _while_statement(self) -> Stmt:
         self._consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.")
@@ -204,7 +201,7 @@ class Parser:
             )
 
         return expr
-    
+
     def _or(self) -> Expr:
         expr = self._and()
 
@@ -224,7 +221,7 @@ class Parser:
             expr = Logical(left=expr, operator=operator, right=right)
 
         return expr
-    
+
     def _equality(self) -> Expr:
         expr = self._comparison()
 

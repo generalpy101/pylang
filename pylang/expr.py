@@ -35,6 +35,7 @@ class ExprVisitor(ABC):
     def visit_logical(self, expr: "Logical"):
         pass
 
+
 # Base Expr class
 class Expr(ABC):
     @abstractmethod

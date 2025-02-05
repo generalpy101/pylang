@@ -95,7 +95,11 @@ def main():
         types={
             "BlockStmt": (("statements", "List[Stmt]"),),
             "ExpressionStmt": (("expression", "Expr"),),
-            "IfStmt": (("condition", "Expr"), ("then_branch", "Stmt"), ("else_branch", "Stmt")),
+            "IfStmt": (
+                ("condition", "Expr"),
+                ("then_branch", "Stmt"),
+                ("else_branch", "Stmt"),
+            ),
             "PrintStmt": (("expression", "Expr"),),
             "VarStmt": (("name", "Token"), ("initializer", "Expr")),
             "WhileStmt": (("condition", "Expr"), ("body", "Stmt")),

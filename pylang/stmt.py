@@ -28,10 +28,11 @@ class StmtVisitor(ABC):
     @abstractmethod
     def visit_if_stmt(self, expr: "IfStmt"):
         pass
-    
+
     @abstractmethod
     def visit_while_stmt(self, expr: "WhileStmt"):
         pass
+
 
 # Base Expr class
 class Stmt(ABC):
@@ -81,8 +82,8 @@ class IfStmt(Stmt):
 
     def accept(self, visitor: StmtVisitor):
         return visitor.visit_if_stmt(self)
-    
-    
+
+
 @dataclass
 class WhileStmt(Stmt):
     condition: Expr

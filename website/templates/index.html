@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Run Pylang</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+    <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+        <h1 class="text-2xl font-bold mb-4">Run Your Pylang Code</h1>
+        <textarea id="code" class="w-full h-40 border p-2 rounded-lg" placeholder="Write your code here..."></textarea>
+        <button id="run-btn" class="bg-blue-500 text-white px-4 py-2 mt-4 rounded-lg">Run</button>
+        <div id="output" class="mt-4 p-4 bg-gray-200 rounded-lg"></div>
+    </div>
+
+    <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-lg mt-6">
+        <h2 class="text-xl font-bold mb-2">Supported Pylang Syntax (Pylang is just another Lox implementation for now)</h2>
+        <p class="text-gray-700 mb-4">The following features of Pylang are currently implemented:</p>
+        <pre class="bg-gray-100 p-4 rounded-lg overflow-x-auto text-sm">
+    <b>// Variables</b>
+    var x = 10;
+    var name = "Hacker";
+    
+    <b>// Control Flow</b>
+    if (x > 5) {
+        print "x is big!";
+    } else {
+        print "x is small.";
+    }
+    
+    for (var i = 0; i < 10; i = i + 1) {
+        print i;
+    }
+    
+    while (x > 0) {
+        print x;
+        x = x - 1;
+    }
+    
+    <b>// Expressions</b>
+    print 1 + 2 * 3;  // 7
+    print "Hello, " + "world!";  // String concatenation
+    
+    <b>// Logical Operators</b>
+    var isCool = true and false;  // false
+    var isFun = true or false;  // true
+    
+
+    <b>// Comments</b>
+    // This is a single-line comment
+        </pre>
+    </div>
+    
+
+    <script>
+        document.getElementById("run-btn").addEventListener("click", async () => {
+            const code = document.getElementById("code").value;
+            const response = await fetch("/run", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ code })
+            });
+            const result = await response.json();
+            
+            // Use <pre> to preserve formatting
+            document.getElementById("output").innerHTML = `<pre>${result.stdout || result.stderr}</pre>`;
+        });
+    </script>
+    
+</body>
+</html>
