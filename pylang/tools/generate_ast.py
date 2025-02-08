@@ -42,7 +42,7 @@ def define_ast(
         visitor_interface = f"""
 # Visitor interface
 class {base_name}Visitor(ABC):
-    {''.join(visitor_methods)}
+    {"".join(visitor_methods)}
         """
 
         # Handle initial contents + interface (including writing to file)
@@ -81,6 +81,11 @@ def main():
         types={
             "Assign": (("name", "Token"), ("value", "Expr")),
             "Binary": (("left", "Expr"), ("operator", "Token"), ("right", "Expr")),
+            "Call": (
+                ("callee", "Expr"),
+                ("paren", "Token"),
+                ("arguments", "List[Expr]"),
+            ),
             "Grouping": (("expression", "Expr"),),
             "Literal": (("value", "object"),),
             "Logical": (("left", "Expr"), ("operator", "Token"), ("right", "Expr")),
@@ -95,12 +100,18 @@ def main():
         types={
             "BlockStmt": (("statements", "List[Stmt]"),),
             "ExpressionStmt": (("expression", "Expr"),),
+            "FunctionStmt": (
+                ("name", "Token"),
+                ("params", "List[Token]"),
+                ("body", "List[Stmt]"),
+            ),
             "IfStmt": (
                 ("condition", "Expr"),
                 ("then_branch", "Stmt"),
                 ("else_branch", "Stmt"),
             ),
             "PrintStmt": (("expression", "Expr"),),
+            "ReturnStmt": (("keyword", "Token"), ("value", "Expr")),
             "VarStmt": (("name", "Token"), ("initializer", "Expr")),
             "WhileStmt": (("condition", "Expr"), ("body", "Stmt")),
         },

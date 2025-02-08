@@ -1,0 +1,14 @@
+def makeCounter() {
+    var i = 0;
+    def count() {
+        // It should access the variable i from the outer scope
+        i = i + 1;
+        print i;
+    }
+
+    return count;
+}
+
+var counter = makeCounter();
+counter();
+counter();

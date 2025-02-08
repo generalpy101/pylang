@@ -1,18 +1,22 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import List
 
 from tokens import Token
 
 
 # Visitor interface
 class ExprVisitor(ABC):
-
     @abstractmethod
     def visit_assign(self, expr: "Assign"):
         pass
 
     @abstractmethod
     def visit_binary(self, expr: "Binary"):
+        pass
+
+    @abstractmethod
+    def visit_call(self, expr: "Call"):
         pass
 
     @abstractmethod
@@ -24,15 +28,15 @@ class ExprVisitor(ABC):
         pass
 
     @abstractmethod
+    def visit_logical(self, expr: "Logical"):
+        pass
+
+    @abstractmethod
     def visit_unary(self, expr: "Unary"):
         pass
 
     @abstractmethod
     def visit_variable(self, expr: "Variable"):
-        pass
-
-    @abstractmethod
-    def visit_logical(self, expr: "Logical"):
         pass
 
 
@@ -63,6 +67,16 @@ class Binary(Expr):
 
 
 @dataclass
+class Call(Expr):
+    callee: Expr
+    paren: Token
+    arguments: List[Expr]
+
+    def accept(self, visitor: ExprVisitor):
+        return visitor.visit_call(self)
+
+
+@dataclass
 class Grouping(Expr):
     expression: Expr
 
@@ -76,6 +90,16 @@ class Literal(Expr):
 
     def accept(self, visitor: ExprVisitor):
         return visitor.visit_literal(self)
+
+
+@dataclass
+class Logical(Expr):
+    left: Expr
+    operator: Token
+    right: Expr
+
+    def accept(self, visitor: ExprVisitor):
+        return visitor.visit_logical(self)
 
 
 @dataclass
@@ -93,13 +117,3 @@ class Variable(Expr):
 
     def accept(self, visitor: ExprVisitor):
         return visitor.visit_variable(self)
-
-
-@dataclass
-class Logical(Expr):
-    left: Expr
-    operator: Token
-    right: Expr
-
-    def accept(self, visitor: ExprVisitor):
-        return visitor.visit_logical(self)

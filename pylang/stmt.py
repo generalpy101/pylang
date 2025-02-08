@@ -8,9 +8,20 @@ from tokens import Token
 
 # Visitor interface
 class StmtVisitor(ABC):
+    @abstractmethod
+    def visit_block_stmt(self, expr: "BlockStmt"):
+        pass
 
     @abstractmethod
     def visit_expression_stmt(self, expr: "ExpressionStmt"):
+        pass
+
+    @abstractmethod
+    def visit_function_stmt(self, expr: "FunctionStmt"):
+        pass
+
+    @abstractmethod
+    def visit_if_stmt(self, expr: "IfStmt"):
         pass
 
     @abstractmethod
@@ -22,15 +33,11 @@ class StmtVisitor(ABC):
         pass
 
     @abstractmethod
-    def visit_block_stmt(self, expr: "BlockStmt"):
-        pass
-
-    @abstractmethod
-    def visit_if_stmt(self, expr: "IfStmt"):
-        pass
-
-    @abstractmethod
     def visit_while_stmt(self, expr: "WhileStmt"):
+        pass
+
+    @abstractmethod
+    def visit_return_stmt(self, expr: "ReturnStmt"):
         pass
 
 
@@ -42,11 +49,39 @@ class Stmt(ABC):
 
 
 @dataclass
+class BlockStmt(Stmt):
+    statements: List[Stmt]
+
+    def accept(self, visitor: StmtVisitor):
+        return visitor.visit_block_stmt(self)
+
+
+@dataclass
 class ExpressionStmt(Stmt):
     expression: Expr
 
     def accept(self, visitor: StmtVisitor):
         return visitor.visit_expression_stmt(self)
+
+
+@dataclass
+class FunctionStmt(Stmt):
+    name: Token
+    params: List[Token]
+    body: List[Stmt]
+
+    def accept(self, visitor: StmtVisitor):
+        return visitor.visit_function_stmt(self)
+
+
+@dataclass
+class IfStmt(Stmt):
+    condition: Expr
+    then_branch: Stmt
+    else_branch: Stmt
+
+    def accept(self, visitor: StmtVisitor):
+        return visitor.visit_if_stmt(self)
 
 
 @dataclass
@@ -67,27 +102,18 @@ class VarStmt(Stmt):
 
 
 @dataclass
-class BlockStmt(Stmt):
-    statements: List[Stmt]
-
-    def accept(self, visitor: StmtVisitor):
-        return visitor.visit_block_stmt(self)
-
-
-@dataclass
-class IfStmt(Stmt):
-    condition: Expr
-    then_branch: Stmt
-    else_branch: Stmt
-
-    def accept(self, visitor: StmtVisitor):
-        return visitor.visit_if_stmt(self)
-
-
-@dataclass
 class WhileStmt(Stmt):
     condition: Expr
     body: Stmt
 
     def accept(self, visitor: StmtVisitor):
         return visitor.visit_while_stmt(self)
+
+
+@dataclass
+class ReturnStmt(Stmt):
+    keyword: Token
+    value: Expr
+
+    def accept(self, visitor: StmtVisitor):
+        return visitor.visit_return_stmt(self)

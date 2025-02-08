@@ -1,19 +1,54 @@
+import time
 from typing import List
 
+from callable import Callable
 from environment import Environment
-from errors import ErrorType, InterpreterRuntimeError
-from expr import (Assign, Binary, Expr, ExprVisitor, Grouping, Literal,
-                  Logical, Unary, Variable)
-from stmt import (BlockStmt, ExpressionStmt, IfStmt, PrintStmt, Stmt,
-                  StmtVisitor, VarStmt, WhileStmt)
+from errors import ErrorType, InterpreterRuntimeError, Return
+from expr import (
+    Assign,
+    Binary,
+    Expr,
+    ExprVisitor,
+    Grouping,
+    Literal,
+    Logical,
+    Unary,
+    Variable,
+)
+from lox_function import LoxFunction
+from stmt import (
+    BlockStmt,
+    ExpressionStmt,
+    IfStmt,
+    PrintStmt,
+    ReturnStmt,
+    Stmt,
+    StmtVisitor,
+    VarStmt,
+    WhileStmt,
+)
 from token_type import TokenType
 from tokens import Token
 from utils.logger import Logger
 
 
+class ClockCallable(Callable):
+    def call(self, interpreter: "Interpreter", arguments: List[object]):
+        return time.time() / 1000
+
+    def arity(self):
+        return 0
+
+    def __str__(self):
+        return "<native fn>clock"
+
+
 class Interpreter(ExprVisitor, StmtVisitor):
     def __init__(self) -> None:
-        self.environment = Environment()
+        self.globals = Environment()
+        self.environment = self.globals
+
+        self.globals.define("clock", ClockCallable())
 
     def interpret(self, stmts: List[Stmt]) -> None:
         try:
@@ -23,6 +58,10 @@ class Interpreter(ExprVisitor, StmtVisitor):
             Logger.error(ErrorType.RuntimeError, e.token.line, e.message)
             # Raise the error to the caller to exit the program
             raise e
+
+    def execute_block(self, stmts: List[Stmt], environment: Environment) -> None:
+        # This method is just a public wrapper around _execute_block
+        self._execute_block(stmts, environment)
 
     def visit_block_stmt(self, expr: BlockStmt):
         self._execute_block(
@@ -142,6 +181,39 @@ class Interpreter(ExprVisitor, StmtVisitor):
         elif expr.operator.token_type == TokenType.EQUAL_EQUAL:
             return self._is_equal(left, right)
         return None
+
+    def visit_call(self, expr):
+        callee = self._evaluate(expr.callee)
+        arguments = [self._evaluate(arg) for arg in expr.arguments]
+
+        if not isinstance(callee, Callable):
+            raise InterpreterRuntimeError(
+                expr.paren, "Can only call functions and classes."
+            )
+
+        if len(arguments) != callee.arity():
+            raise InterpreterRuntimeError(
+                expr.paren,
+                f"Expected {callee.arity()} arguments but got {len(arguments)}.",
+            )
+
+        return callee.call(self, arguments)
+
+    def visit_function_stmt(self, expr):
+        function = LoxFunction(
+            declaration=expr, closure=self.environment, is_initializer=False
+        )
+        self.environment.define(expr.name.lexeme, function)
+        return None
+
+    def visit_return_stmt(self, stmt: ReturnStmt):
+        value = None
+        if stmt.value != None:
+            value = self._evaluate(stmt.value)
+
+        # Raise a custom exception to handle the return statement
+        # This will allow us to jump through the call stack and return the value
+        raise Return(value)
 
     def _is_truthy(self, obj: object) -> bool:
         if obj is None:

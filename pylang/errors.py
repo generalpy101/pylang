@@ -14,3 +14,9 @@ class InterpreterRuntimeError(Exception):
         self.token = token
         self.message = message
         super().__init__(message)
+
+
+class Return(Exception):
+    def __init__(self, value: object) -> None:
+        self.value = value
+        super().__init__(value)
