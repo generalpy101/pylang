@@ -3,12 +3,20 @@ def makeCounter() {
     def count() {
         // It should access the variable i from the outer scope
         i = i + 1;
-        print i;
+        //print i;
     }
 
     return count;
 }
 
+print "Program start";
+var start = clock();
 var counter = makeCounter();
-counter();
-counter();
+for (var i = 0; i < 1000; i = i + 1) {
+    counter();
+}
+var end = clock();
+print "Program end";
+print start;
+print end;
+print end - start;

@@ -1,46 +1,18 @@
 import time
+from ast.expr import (Assign, Binary, Expr, ExprVisitor, Grouping, Literal,
+                      Logical, Unary, Variable)
+from ast.stmt import (BlockStmt, ExpressionStmt, IfStmt, PrintStmt, ReturnStmt,
+                      Stmt, StmtVisitor, VarStmt, WhileStmt)
 from typing import Dict, List
 
 from interpreter.callable import Callable
 from interpreter.environment import Environment
-from utils.errors import ErrorType, InterpreterRuntimeError, Return
-from ast.expr import (
-    Assign,
-    Binary,
-    Expr,
-    ExprVisitor,
-    Grouping,
-    Literal,
-    Logical,
-    Unary,
-    Variable,
-)
 from interpreter.lox_function import LoxFunction
-from ast.stmt import (
-    BlockStmt,
-    ExpressionStmt,
-    IfStmt,
-    PrintStmt,
-    ReturnStmt,
-    Stmt,
-    StmtVisitor,
-    VarStmt,
-    WhileStmt,
-)
 from lexer.token_type import TokenType
 from lexer.tokens import Token
+from stdlib.builtins import ClockCallable
+from utils.errors import ErrorType, InterpreterRuntimeError, Return
 from utils.logger import Logger
-
-
-class ClockCallable(Callable):
-    def call(self, interpreter: "Interpreter", arguments: List[object]):
-        return time.time() / 1000
-
-    def arity(self):
-        return 0
-
-    def __str__(self):
-        return "<native fn>clock"
 
 
 class Interpreter(ExprVisitor, StmtVisitor):

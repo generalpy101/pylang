@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
+from ast.expr import Expr
 from dataclasses import dataclass
 from typing import List
 
-from ast.expr import Expr
 from lexer.tokens import Token
 
 

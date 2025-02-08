@@ -1,11 +1,11 @@
 import sys
+from ast.stmt import Stmt
 from parser.parser import Parser
 from typing import List
 
 from interpreter.interpreter import Interpreter, InterpreterRuntimeError
 from interpreter.resolver import Resolver, ResolverError
 from lexer.scanner import Scanner
-from ast.stmt import Stmt
 from lexer.tokens import Token
 
 

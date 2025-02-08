@@ -1,5 +1,5 @@
-from utils.errors import InterpreterRuntimeError
 from lexer.tokens import Token
+from utils.errors import InterpreterRuntimeError
 
 
 class Environment:

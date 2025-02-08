@@ -1,9 +1,9 @@
 import string
 from typing import List
 
-from utils.errors import ErrorType
 from lexer.token_type import TokenType
 from lexer.tokens import Token
+from utils.errors import ErrorType
 from utils.logger import Logger
 
 WHITESPACES_TO_IGNORE = [" ", "\t", "\r"]

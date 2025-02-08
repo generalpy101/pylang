@@ -1,20 +1,12 @@
+from ast.expr import (Assign, Binary, Call, Expr, Literal, Logical, Unary,
+                      Variable)
+from ast.stmt import (BlockStmt, ExpressionStmt, FunctionStmt, IfStmt,
+                      PrintStmt, ReturnStmt, Stmt, VarStmt, WhileStmt)
 from typing import List
 
-from utils.errors import ErrorType
-from ast.expr import Assign, Binary, Call, Expr, Literal, Logical, Unary, Variable
-from ast.stmt import (
-    BlockStmt,
-    ExpressionStmt,
-    FunctionStmt,
-    IfStmt,
-    PrintStmt,
-    ReturnStmt,
-    Stmt,
-    VarStmt,
-    WhileStmt,
-)
 from lexer.token_type import TokenType
 from lexer.tokens import Token
+from utils.errors import ErrorType
 from utils.logger import Logger
 
 

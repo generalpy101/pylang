@@ -1,33 +1,14 @@
+from ast.expr import (Assign, Binary, Call, Expr, ExprVisitor, Grouping,
+                      Literal, Logical, Unary, Variable)
+from ast.stmt import (BlockStmt, ExpressionStmt, FunctionStmt, IfStmt,
+                      PrintStmt, ReturnStmt, Stmt, StmtVisitor, VarStmt,
+                      WhileStmt)
 from enum import Enum
 from typing import Dict, List
 
-from utils.errors import ResolverError
-from ast.expr import (
-    Assign,
-    Binary,
-    Call,
-    Expr,
-    ExprVisitor,
-    Grouping,
-    Literal,
-    Logical,
-    Unary,
-    Variable,
-)
 from interpreter.interpreter import Interpreter
-from ast.stmt import (
-    BlockStmt,
-    ExpressionStmt,
-    FunctionStmt,
-    IfStmt,
-    PrintStmt,
-    ReturnStmt,
-    Stmt,
-    StmtVisitor,
-    VarStmt,
-    WhileStmt,
-)
 from lexer.tokens import Token
+from utils.errors import ResolverError
 from utils.logger import Logger
 
 
@@ -67,7 +48,10 @@ class Resolver(ExprVisitor, StmtVisitor):
         if len(self.scopes) > 0:
             exists_in_current_scope = self.scopes[-1].get(expr.name.lexeme)
             if exists_in_current_scope is False:
-                raise Exception(f"Cannot read local variable in its own initializer")
+                raise ResolverError(
+                    token=expr.name,
+                    message=f"Cannot read local variable in its own initializer",
+                )
 
         self._resolve_local(expr, expr.name.lexeme)
 
