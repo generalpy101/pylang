@@ -2,17 +2,8 @@ from typing import List
 
 from errors import ErrorType
 from expr import Assign, Binary, Call, Expr, Literal, Logical, Unary, Variable
-from stmt import (
-    BlockStmt,
-    ExpressionStmt,
-    FunctionStmt,
-    IfStmt,
-    PrintStmt,
-    ReturnStmt,
-    Stmt,
-    VarStmt,
-    WhileStmt,
-)
+from stmt import (BlockStmt, ExpressionStmt, FunctionStmt, IfStmt, PrintStmt,
+                  ReturnStmt, Stmt, VarStmt, WhileStmt)
 from token_type import TokenType
 from tokens import Token
 from utils.logger import Logger

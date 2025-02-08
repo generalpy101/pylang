@@ -1,32 +1,14 @@
 import time
-from typing import List
+from typing import Dict, List
 
 from callable import Callable
 from environment import Environment
 from errors import ErrorType, InterpreterRuntimeError, Return
-from expr import (
-    Assign,
-    Binary,
-    Expr,
-    ExprVisitor,
-    Grouping,
-    Literal,
-    Logical,
-    Unary,
-    Variable,
-)
+from expr import (Assign, Binary, Expr, ExprVisitor, Grouping, Literal,
+                  Logical, Unary, Variable)
 from lox_function import LoxFunction
-from stmt import (
-    BlockStmt,
-    ExpressionStmt,
-    IfStmt,
-    PrintStmt,
-    ReturnStmt,
-    Stmt,
-    StmtVisitor,
-    VarStmt,
-    WhileStmt,
-)
+from stmt import (BlockStmt, ExpressionStmt, IfStmt, PrintStmt, ReturnStmt,
+                  Stmt, StmtVisitor, VarStmt, WhileStmt)
 from token_type import TokenType
 from tokens import Token
 from utils.logger import Logger
@@ -47,6 +29,7 @@ class Interpreter(ExprVisitor, StmtVisitor):
     def __init__(self) -> None:
         self.globals = Environment()
         self.environment = self.globals
+        self.locals: Dict[Token, int] = {}
 
         self.globals.define("clock", ClockCallable())
 
@@ -58,6 +41,9 @@ class Interpreter(ExprVisitor, StmtVisitor):
             Logger.error(ErrorType.RuntimeError, e.token.line, e.message)
             # Raise the error to the caller to exit the program
             raise e
+
+    def resolve(self, expr: Expr, depth: int):
+        self.locals[expr] = depth
 
     def execute_block(self, stmts: List[Stmt], environment: Environment) -> None:
         # This method is just a public wrapper around _execute_block
@@ -79,7 +65,12 @@ class Interpreter(ExprVisitor, StmtVisitor):
 
     def visit_assign(self, expr: Assign):
         value = self._evaluate(expr.value)
-        self.environment.assign(expr.name, value)
+        distance = self.locals.get(expr)
+
+        if distance is not None:
+            self.environment.assign_at(distance, expr.name, value)
+        else:
+            self.globals.assign(expr.name, value)
         return value
 
     def visit_expression_stmt(self, stmt: ExpressionStmt) -> None:
@@ -133,7 +124,7 @@ class Interpreter(ExprVisitor, StmtVisitor):
         return None
 
     def visit_variable(self, expr: Variable):
-        return self.environment.get(expr.name)
+        return self._look_up_variable(expr.name, expr)
 
     def visit_binary(self, expr: Binary) -> object | None:
         left = self._evaluate(expr.left)
@@ -279,3 +270,11 @@ class Interpreter(ExprVisitor, StmtVisitor):
                 self._execute(statement)
         finally:
             self.environment = previous
+
+    def _look_up_variable(self, name: Token, expr: Expr):
+        distance = self.locals.get(expr)
+
+        if distance is not None:
+            return self.environment.get_at(distance, name.lexeme)
+        else:
+            return self.globals.get(name)

@@ -9,35 +9,35 @@ from tokens import Token
 # Visitor interface
 class StmtVisitor(ABC):
     @abstractmethod
-    def visit_block_stmt(self, expr: "BlockStmt"):
+    def visit_block_stmt(self, stmt: "BlockStmt"):
         pass
 
     @abstractmethod
-    def visit_expression_stmt(self, expr: "ExpressionStmt"):
+    def visit_expression_stmt(self, stmt: "ExpressionStmt"):
         pass
 
     @abstractmethod
-    def visit_function_stmt(self, expr: "FunctionStmt"):
+    def visit_function_stmt(self, stmt: "FunctionStmt"):
         pass
 
     @abstractmethod
-    def visit_if_stmt(self, expr: "IfStmt"):
+    def visit_if_stmt(self, stmt: "IfStmt"):
         pass
 
     @abstractmethod
-    def visit_print_stmt(self, expr: "PrintStmt"):
+    def visit_print_stmt(self, stmt: "PrintStmt"):
         pass
 
     @abstractmethod
-    def visit_var_stmt(self, expr: "VarStmt"):
+    def visit_var_stmt(self, stmt: "VarStmt"):
         pass
 
     @abstractmethod
-    def visit_while_stmt(self, expr: "WhileStmt"):
+    def visit_while_stmt(self, stmt: "WhileStmt"):
         pass
 
     @abstractmethod
-    def visit_return_stmt(self, expr: "ReturnStmt"):
+    def visit_return_stmt(self, stmt: "ReturnStmt"):
         pass
 
 

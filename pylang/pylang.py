@@ -2,8 +2,8 @@ import sys
 from parser import Parser
 from typing import List
 
-from errors import ErrorType
 from interpreter import Interpreter, InterpreterRuntimeError
+from resolver import Resolver, ResolverError
 from scanner import Scanner
 from stmt import Stmt
 from tokens import Token
@@ -14,16 +14,19 @@ def run(source_code: str, is_repl: bool = False):
         lexical_scanner: Scanner = Scanner(source_code=source_code)
         tokens: List[Token] = lexical_scanner.scan_tokens()
         parser: Parser = Parser(tokens=tokens)
-        expressions: List[Stmt] | None = parser.parse()
+        statements: List[Stmt] | None = parser.parse()
 
-        if expressions is None:
+        if statements is None:
             if not is_repl:
                 exit(64)
             return
 
         interpreter: Interpreter = Interpreter()
-        interpreter.interpret(stmts=expressions)
-    except InterpreterRuntimeError as e:
+        resolver: Resolver = Resolver(interpreter=interpreter)
+        resolver.resolve_statements(statements)
+        interpreter.interpret(stmts=statements)
+
+    except (InterpreterRuntimeError, ResolverError) as e:
         if not is_repl:
             exit(70)
 
