@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import List
 
-from expr import Expr
-from tokens import Token
+from ast.expr import Expr
+from lexer.tokens import Token
 
 
 # Visitor interface

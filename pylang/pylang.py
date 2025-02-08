@@ -1,12 +1,12 @@
 import sys
-from parser import Parser
+from parser.parser import Parser
 from typing import List
 
-from interpreter import Interpreter, InterpreterRuntimeError
-from resolver import Resolver, ResolverError
-from scanner import Scanner
-from stmt import Stmt
-from tokens import Token
+from interpreter.interpreter import Interpreter, InterpreterRuntimeError
+from interpreter.resolver import Resolver, ResolverError
+from lexer.scanner import Scanner
+from ast.stmt import Stmt
+from lexer.tokens import Token
 
 
 def run(source_code: str, is_repl: bool = False):

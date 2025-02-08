@@ -1,16 +1,34 @@
 import time
 from typing import Dict, List
 
-from callable import Callable
-from environment import Environment
-from errors import ErrorType, InterpreterRuntimeError, Return
-from expr import (Assign, Binary, Expr, ExprVisitor, Grouping, Literal,
-                  Logical, Unary, Variable)
-from lox_function import LoxFunction
-from stmt import (BlockStmt, ExpressionStmt, IfStmt, PrintStmt, ReturnStmt,
-                  Stmt, StmtVisitor, VarStmt, WhileStmt)
-from token_type import TokenType
-from tokens import Token
+from interpreter.callable import Callable
+from interpreter.environment import Environment
+from utils.errors import ErrorType, InterpreterRuntimeError, Return
+from ast.expr import (
+    Assign,
+    Binary,
+    Expr,
+    ExprVisitor,
+    Grouping,
+    Literal,
+    Logical,
+    Unary,
+    Variable,
+)
+from interpreter.lox_function import LoxFunction
+from ast.stmt import (
+    BlockStmt,
+    ExpressionStmt,
+    IfStmt,
+    PrintStmt,
+    ReturnStmt,
+    Stmt,
+    StmtVisitor,
+    VarStmt,
+    WhileStmt,
+)
+from lexer.token_type import TokenType
+from lexer.tokens import Token
 from utils.logger import Logger
 
 

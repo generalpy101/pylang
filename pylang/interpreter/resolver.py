@@ -1,13 +1,33 @@
 from enum import Enum
 from typing import Dict, List
 
-from errors import ResolverError
-from expr import (Assign, Binary, Call, Expr, ExprVisitor, Grouping, Literal,
-                  Logical, Unary, Variable)
-from interpreter import Interpreter
-from stmt import (BlockStmt, ExpressionStmt, FunctionStmt, IfStmt, PrintStmt,
-                  ReturnStmt, Stmt, StmtVisitor, VarStmt, WhileStmt)
-from tokens import Token
+from utils.errors import ResolverError
+from ast.expr import (
+    Assign,
+    Binary,
+    Call,
+    Expr,
+    ExprVisitor,
+    Grouping,
+    Literal,
+    Logical,
+    Unary,
+    Variable,
+)
+from interpreter.interpreter import Interpreter
+from ast.stmt import (
+    BlockStmt,
+    ExpressionStmt,
+    FunctionStmt,
+    IfStmt,
+    PrintStmt,
+    ReturnStmt,
+    Stmt,
+    StmtVisitor,
+    VarStmt,
+    WhileStmt,
+)
+from lexer.tokens import Token
 from utils.logger import Logger
 
 

@@ -1,9 +1,9 @@
 from typing import List
 
-from callable import Callable
-from environment import Environment
-from errors import Return
-from stmt import FunctionStmt
+from interpreter.callable import Callable
+from interpreter.environment import Environment
+from utils.errors import Return
+from ast.stmt import FunctionStmt
 
 
 class LoxFunction(Callable):

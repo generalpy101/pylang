@@ -1,4 +1,4 @@
-from token_type import TokenType
+from lexer.token_type import TokenType
 
 
 class Token:

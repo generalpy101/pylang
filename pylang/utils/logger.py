@@ -1,4 +1,4 @@
-from errors import ErrorType
+from utils.errors import ErrorType
 
 
 class Logger:

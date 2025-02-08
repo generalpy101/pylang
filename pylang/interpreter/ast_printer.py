@@ -1,6 +1,6 @@
-from expr import Binary, Expr, ExprVisitor, Grouping, Literal, Unary
-from token_type import TokenType
-from tokens import Token
+from ast.expr import Binary, Expr, ExprVisitor, Grouping, Literal, Unary
+from lexer.token_type import TokenType
+from lexer.tokens import Token
 
 
 class AstPrinter(ExprVisitor):

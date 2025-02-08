@@ -1,6 +1,6 @@
 from enum import Enum
 
-from tokens import Token
+from lexer.tokens import Token
 
 
 class ErrorType(Enum):
