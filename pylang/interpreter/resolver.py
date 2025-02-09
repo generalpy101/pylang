@@ -47,7 +47,7 @@ class Resolver(ExprVisitor, StmtVisitor):
     def visit_variable(self, expr: Variable):
         if len(self.scopes) > 0:
             exists_in_current_scope = self.scopes[-1].get(expr.name.lexeme)
-            if exists_in_current_scope is False:
+            if exists_in_current_scope is None or exists_in_current_scope is False:
                 raise ResolverError(
                     token=expr.name,
                     message=f"Cannot read local variable in its own initializer",
