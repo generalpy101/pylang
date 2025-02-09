@@ -40,6 +40,10 @@ class StmtVisitor(ABC):
     def visit_return_stmt(self, stmt: "ReturnStmt"):
         pass
 
+    @abstractmethod
+    def visit_class_stmt(self, stmt: "ClassStmt"):
+        pass
+
 
 # Base Expr class
 class Stmt(ABC):
@@ -117,3 +121,12 @@ class ReturnStmt(Stmt):
 
     def accept(self, visitor: StmtVisitor):
         return visitor.visit_return_stmt(self)
+
+
+@dataclass
+class ClassStmt(Stmt):
+    name: Token
+    methods: List[FunctionStmt]
+
+    def accept(self, visitor: StmtVisitor):
+        return visitor.visit_class_stmt(self)

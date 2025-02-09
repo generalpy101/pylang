@@ -23,12 +23,22 @@ class LoxFunction(Callable):
         try:
             interpreter.execute_block(self.declaration.body, environment)
         except Return as r:
+            if self.is_initializer:
+                return self.closure.get_at(0, "self")
             return r.value
+
+        if self.is_initializer:
+            return self.closure.get_at(0, "self")
 
         return None
 
     def arity(self):
         return len(self.declaration.params)
+
+    def bind(self, instance: "LoxInstance"):
+        environment = Environment(enclosing_scope=self.closure)
+        environment.define("self", instance)
+        return LoxFunction(self.declaration, environment, self.is_initializer)
 
     def __str__(self):
         return f"<fn>{self.declaration.name.lexeme}"

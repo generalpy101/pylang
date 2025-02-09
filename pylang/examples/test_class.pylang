@@ -1,0 +1,12 @@
+class Test {
+    init(name) {
+        print "Test class initialized";
+        self.name = name;
+    }
+    printName() {
+        print "Name: " + self.name;
+    }
+}
+
+var test = Test("Hacker");
+test.printName();

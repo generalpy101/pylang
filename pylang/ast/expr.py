@@ -39,6 +39,18 @@ class ExprVisitor(ABC):
     def visit_variable(self, expr: "Variable"):
         pass
 
+    @abstractmethod
+    def visit_get(self, expr: "Get"):
+        pass
+
+    @abstractmethod
+    def visit_set(self, expr: "SetExpr"):
+        pass
+
+    @abstractmethod
+    def visit_self(self, expr: "Self"):
+        pass
+
 
 # Base Expr class
 class Expr(ABC):
@@ -120,3 +132,30 @@ class Variable(Expr):
 
     def accept(self, visitor: ExprVisitor):
         return visitor.visit_variable(self)
+
+
+@dataclass(eq=False)
+class Get(Expr):
+    object: Expr
+    name: Token
+
+    def accept(self, visitor: ExprVisitor):
+        return visitor.visit_get(self)
+
+
+@dataclass(eq=False)
+class SetExpr(Expr):
+    object: Expr
+    name: Token
+    value: Expr
+
+    def accept(self, visitor: ExprVisitor):
+        return visitor.visit_set(self)
+
+
+@dataclass(eq=False)
+class Self(Expr):
+    keyword: Token
+
+    def accept(self, visitor: ExprVisitor):
+        return visitor.visit_self(self)

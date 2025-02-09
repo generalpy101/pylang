@@ -1,13 +1,13 @@
 import time
-from ast.expr import (Assign, Binary, Expr, ExprVisitor, Grouping, Literal,
-                      Logical, Unary, Variable)
-from ast.stmt import (BlockStmt, ExpressionStmt, IfStmt, PrintStmt, ReturnStmt,
-                      Stmt, StmtVisitor, VarStmt, WhileStmt)
+from ast.expr import *
+from ast.stmt import *
 from typing import Dict, List
 
 from interpreter.callable import Callable
 from interpreter.environment import Environment
+from interpreter.lox_class import LoxClass
 from interpreter.lox_function import LoxFunction
+from interpreter.lox_instance import LoxInstance
 from lexer.token_type import TokenType
 from lexer.tokens import Token
 from stdlib.builtins import ClockCallable
@@ -78,6 +78,21 @@ class Interpreter(ExprVisitor, StmtVisitor):
         value = self._evaluate(stmt.expression)
         print(self._stringify(value))
 
+    def visit_class_stmt(self, stmt: ClassStmt):
+        self.environment.define(stmt.name.lexeme, None)
+
+        methods = {}
+        for method in stmt.methods:
+            function = LoxFunction(
+                declaration=method,
+                closure=self.environment,
+                is_initializer=(method.name.lexeme == "init"),
+            )
+            methods[method.name.lexeme] = function
+
+        kclass = LoxClass(name=stmt.name.lexeme, methods=methods)
+        self.environment.assign(stmt.name, kclass)
+
     def visit_literal(self, expr: Literal) -> object:
         return expr.value
 
@@ -94,6 +109,9 @@ class Interpreter(ExprVisitor, StmtVisitor):
             return not self._is_truthy(right)
 
         return None
+
+    def visit_self(self, expr: Self):
+        return self._look_up_variable(expr.keyword, expr)
 
     def visit_logical(self, expr: Logical):
         left = self._evaluate(expr.left)
@@ -115,6 +133,23 @@ class Interpreter(ExprVisitor, StmtVisitor):
 
     def visit_variable(self, expr: Variable):
         return self._look_up_variable(expr.name, expr)
+
+    def visit_get(self, expr: Get):
+        obj: LoxInstance = self._evaluate(expr.object)
+        if isinstance(obj, LoxInstance):
+            return obj.get(expr.name)
+
+        raise InterpreterRuntimeError(expr.name, "Only instances have properties.")
+
+    def visit_set(self, expr: SetExpr):
+        obj: LoxInstance = self._evaluate(expr.object)
+
+        if not isinstance(obj, LoxInstance):
+            raise InterpreterRuntimeError(expr.name, "Only instances have fields.")
+
+        value = self._evaluate(expr.value)
+        obj.set(expr.name, value)
+        return value
 
     def visit_binary(self, expr: Binary) -> object | None:
         left = self._evaluate(expr.left)

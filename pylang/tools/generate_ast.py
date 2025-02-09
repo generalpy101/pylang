@@ -86,9 +86,12 @@ def main():
                 ("paren", "Token"),
                 ("arguments", "List[Expr]"),
             ),
+            "Get": (("object", "Expr"), ("name", "Token")),
+            "Set": (("object", "Expr"), ("name", "Token"), ("value", "Expr")),
             "Grouping": (("expression", "Expr"),),
             "Literal": (("value", "object"),),
             "Logical": (("left", "Expr"), ("operator", "Token"), ("right", "Expr")),
+            "Self": (("keyword", "Token"),),
             "Unary": (("operator", "Token"), ("right", "Expr")),
             "Variable": (("name", "Token"),),
         },
@@ -99,6 +102,7 @@ def main():
         base_name="Stmt",
         types={
             "BlockStmt": (("statements", "List[Stmt]"),),
+            "ClassStmt": (("name", "Token"), ("methods", "List[FunctionStmt]")),
             "ExpressionStmt": (("expression", "Expr"),),
             "FunctionStmt": (
                 ("name", "Token"),

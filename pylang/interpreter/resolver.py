@@ -1,8 +1,5 @@
-from ast.expr import (Assign, Binary, Call, Expr, ExprVisitor, Grouping,
-                      Literal, Logical, Unary, Variable)
-from ast.stmt import (BlockStmt, ExpressionStmt, FunctionStmt, IfStmt,
-                      PrintStmt, ReturnStmt, Stmt, StmtVisitor, VarStmt,
-                      WhileStmt)
+from ast.expr import *
+from ast.stmt import *
 from enum import Enum
 from typing import Dict, List
 
@@ -15,6 +12,13 @@ from utils.logger import Logger
 class FunctionType(Enum):
     NONE = "NONE"
     FUNCTION = "FUNCTION"
+    METHOD = "METHOD"
+    INITIALIZER = "INITIALIZER"
+
+
+class ClassType(Enum):
+    NONE = "NONE"
+    CLASS = "CLASS"
 
 
 class Resolver(ExprVisitor, StmtVisitor):
@@ -22,6 +26,7 @@ class Resolver(ExprVisitor, StmtVisitor):
         self.interpreter = interpreter
         self.scopes: List[Dict[str, bool]] = []
         self.current_function = FunctionType.NONE
+        self.current_class = ClassType.NONE
 
     def resolve_statements(self, statements: List[Stmt]):
         for statement in statements:
@@ -82,11 +87,33 @@ class Resolver(ExprVisitor, StmtVisitor):
             raise ResolverError(stmt.keyword, "Cannot return from top-level code")
 
         if stmt.value is not None:
+            if self.current_function == FunctionType.INITIALIZER:
+                raise ResolverError(
+                    stmt.keyword, "Cannot return a value from an initializer"
+                )
             self._resolve_expr(stmt.value)
 
     def visit_while_stmt(self, stmt: WhileStmt):
         self._resolve_expr(stmt.condition)
         self._resolve_stmt(stmt.body)
+
+    def visit_class_stmt(self, stmt: ClassStmt):
+        enclosing_class = self.current_class
+        self.current_class = ClassType.CLASS
+        self._declare(stmt.name.lexeme)
+        self._define(stmt.name.lexeme)
+
+        self._begin_scope()
+        self.scopes[-1]["self"] = True
+
+        for method in stmt.methods:
+            declaration = FunctionType.METHOD
+            if method.name.lexeme == "init":
+                declaration = FunctionType.INITIALIZER
+            self._resolve_function(method, declaration)
+
+        self._end_scope()
+        self.current_class = enclosing_class
 
     def visit_binary(self, expr: Binary):
         self._resolve_expr(expr.left)
@@ -110,6 +137,19 @@ class Resolver(ExprVisitor, StmtVisitor):
 
     def visit_unary(self, expr: Unary):
         self._resolve_expr(expr.right)
+
+    def visit_get(self, expr: Get):
+        self._resolve_expr(expr.object)
+
+    def visit_set(self, expr: SetExpr):
+        self._resolve_expr(expr.value)
+        self._resolve_expr(expr.object)
+
+    def visit_self(self, expr: Self):
+        if self.current_class == ClassType.NONE:
+            raise ResolverError(expr.keyword, "Cannot use 'self' outside of a class")
+
+        self._resolve_local(expr, expr.keyword.lexeme)
 
     def _declare(self, name: str):
         if len(self.scopes) == 0:

@@ -1,7 +1,5 @@
-from ast.expr import (Assign, Binary, Call, Expr, Literal, Logical, Unary,
-                      Variable)
-from ast.stmt import (BlockStmt, ExpressionStmt, FunctionStmt, IfStmt,
-                      PrintStmt, ReturnStmt, Stmt, VarStmt, WhileStmt)
+from ast.expr import *
+from ast.stmt import *
 from typing import List
 
 from lexer.token_type import TokenType
@@ -19,7 +17,7 @@ class Parser:
     Parser for the lox language
     Grammar used is:
     expression     → assignment ;
-    assignment     → IDENTIFIER "=" assignment
+    assignment     → (call ".")? IDENTIFIER "=" assignment
                 | logic_or ;
     logic_or       → logic_and ( "or" logic_and )* ;
     logic_and      → equality ( "and" equality )* ;
@@ -28,14 +26,16 @@ class Parser:
     term           → factor ( ( "-" | "+" ) factor )* ;
     factor         → unary ( ( "/" | "*" ) unary )* ;
     unary          → ( "!" | "-" ) unary | call ;
-    call           → primary ( "(" arguments? ")" )* ;
+    call           → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
     argumenst      → expression ( "," expression )* ;
     primary        → NUMBER | STRING | "true" | "false" | "nil"
                 | "(" expression ")" | IDENTIFIER ;
     program        → declaration* EOF ;
-    declaration    → funDecl
+    declaration    → classDecl
+                | funDecl
                 | varDecl
                 | statement ;
+    classDecl      → "class" IDENTIFIER "{" function* "}" ;
     funDecl        → "def" function ;
     function       → IDENTIFIER "(" parameters? ")" block ;
     parameters     → IDENTIFIER ( "," IDENTIFIER )* ;
@@ -79,6 +79,8 @@ class Parser:
 
     def _declaration(self) -> Stmt:
         try:
+            if self._match(TokenType.CLASS):
+                return self._class_declaration()
             if self._match(TokenType.DEF):
                 return self._funtion_declaration("function")
             if self._match(TokenType.VAR):
@@ -87,6 +89,20 @@ class Parser:
         except ParserError:
             self._synchronize()
             return None
+
+    def _class_declaration(self) -> Stmt:
+        name = self._consume(TokenType.IDENTIFIER, "Expected class name.")
+        self._consume(TokenType.LEFT_BRACE, "Expect '{' before class body.")
+
+        methods = []
+
+        while (
+            not self._peek().token_type == TokenType.RIGHT_BRACE and not self._is_end()
+        ):
+            methods.append(self._funtion_declaration("method"))
+
+        self._consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.")
+        return ClassStmt(name=name, methods=methods)
 
     def _funtion_declaration(self, kind: str) -> Stmt:
         name = self._consume(TokenType.IDENTIFIER, f"Expect {kind} name.")
@@ -243,6 +259,8 @@ class Parser:
             if isinstance(expr, Variable):
                 name = expr.name
                 return Assign(name=name, value=value)
+            elif isinstance(expr, Get):
+                return SetExpr(object=expr.object, name=expr.name, value=value)
 
             Logger.error(
                 ErrorType.SyntaxError, equals.line, "Invalid assignment target."
@@ -329,6 +347,11 @@ class Parser:
         while True:
             if self._match(TokenType.LEFT_PAREN):
                 expr = self._finish_call(expr)
+            elif self._match(TokenType.DOT):
+                name = self._consume(
+                    TokenType.IDENTIFIER, "Expect property name after '.'."
+                )
+                expr = Get(object=expr, name=name)
             else:
                 break
 
@@ -359,6 +382,9 @@ class Parser:
 
         if self._match(TokenType.NUMBER, TokenType.STRING):
             return Literal(self._previous().literal)
+
+        if self._match(TokenType.SELF):
+            return Self(keyword=self._previous())
 
         if self._match(TokenType.LEFT_PAREN):
             expr = self._expression()

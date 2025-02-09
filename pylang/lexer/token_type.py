@@ -43,7 +43,7 @@ class TokenType(Enum):
     PRINT = "PRINT"
     RETURN = "RETURN"
     SUPER = "SUPER"
-    THIS = "THIS"
+    SELF = "SELF"
     TRUE = "TRUE"
     VAR = "VAR"
     WHILE = "WHILE"
