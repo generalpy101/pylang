@@ -16,6 +16,7 @@ class Parser:
     def __init__(self, tokens: List[Token]) -> None:
         self.tokens = tokens
         self.current = 0
+        self.had_error = False
 
     def parse(self) -> Expr | None:
         try:
@@ -24,12 +25,17 @@ class Parser:
                 evaluated_stmt = self._declaration()
                 if evaluated_stmt is not None:
                     statements.append(evaluated_stmt)
-            return statements
+            return statements if not self.had_error else None
         except ParserError:
             return None
         except Exception as e:
             Logger.error(ErrorType.SyntaxError, self._peek().line, str(e))
             return None
+
+    def _error(self, token: Token, message: str):
+        Logger.error(ErrorType.SyntaxError, token.line, message)
+        self.had_error = True
+        raise ParserError(message)
 
     def _declaration(self) -> Stmt:
         try:
@@ -385,15 +391,9 @@ class Parser:
 
         current_token = self._peek()
         if current_token.token_type == TokenType.EOF:
-            Logger.error(
-                ErrorType.SyntaxError,
-                current_token.line,
-                "Unexpected end of the code." + message,
-            )
-            raise ParserError("Unexpected end of the code." + message)
+            self._error(current_token, message)
         else:
-            Logger.error(ErrorType.SyntaxError, current_token.line, message)
-            raise ParserError(message)
+            self._error(current_token, message)
 
     def _synchronize(self):
         self._advance()
