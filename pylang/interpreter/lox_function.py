@@ -1,4 +1,4 @@
-from ast.stmt import FunctionStmt
+from ast_pylang.stmt import FunctionStmt
 from typing import List
 
 from interpreter.callable import Callable

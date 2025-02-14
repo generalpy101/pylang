@@ -1,5 +1,5 @@
-from ast.expr import *
-from ast.stmt import *
+from ast_pylang.expr import *
+from ast_pylang.stmt import *
 from typing import List
 
 from lexer.token_type import TokenType

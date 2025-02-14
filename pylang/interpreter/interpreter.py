@@ -1,6 +1,6 @@
 import time
-from ast.expr import *
-from ast.stmt import *
+from ast_pylang.expr import *
+from ast_pylang.stmt import *
 from typing import Dict, List
 
 from interpreter.callable import Callable

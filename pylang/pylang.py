@@ -1,5 +1,5 @@
 import sys
-from ast.stmt import Stmt
+from ast_pylang.stmt import Stmt
 from parser.parser import Parser
 from typing import List
 

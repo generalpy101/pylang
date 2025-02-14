@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from ast.expr import Expr
+from ast_pylang.expr import Expr
 from dataclasses import dataclass
 from typing import List
 

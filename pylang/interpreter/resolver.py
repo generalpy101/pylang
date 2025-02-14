@@ -1,5 +1,5 @@
-from ast.expr import *
-from ast.stmt import *
+from ast_pylang.expr import *
+from ast_pylang.stmt import *
 from enum import Enum
 from typing import Dict, List
 
