@@ -12,6 +12,7 @@ class TokenType(Enum):
     MINUS = "- MINUS"
     PLUS = "+ PLUS"
     SEMICOLON = "; SEMICOLON"
+    COLON = ": COLON"
     SLASH = "/ SLASH"
     STAR = "* STAR"
 

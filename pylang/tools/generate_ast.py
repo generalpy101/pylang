@@ -92,6 +92,7 @@ def main():
             "Literal": (("value", "object"),),
             "Logical": (("left", "Expr"), ("operator", "Token"), ("right", "Expr")),
             "Self": (("keyword", "Token"),),
+            "Super": (("keyword", "Token"), ("method", "Token")),
             "Unary": (("operator", "Token"), ("right", "Expr")),
             "Variable": (("name", "Token"),),
         },
@@ -102,7 +103,11 @@ def main():
         base_name="Stmt",
         types={
             "BlockStmt": (("statements", "List[Stmt]"),),
-            "ClassStmt": (("name", "Token"), ("methods", "List[FunctionStmt]")),
+            "ClassStmt": (
+                ("name", "Token"),
+                ("superclass", "Variable"),
+                ("methods", "List[FunctionStmt]"),
+            ),
             "ExpressionStmt": (("expression", "Expr"),),
             "FunctionStmt": (
                 ("name", "Token"),

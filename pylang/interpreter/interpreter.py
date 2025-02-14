@@ -18,7 +18,7 @@ from utils.logger import Logger
 class Interpreter(ExprVisitor, StmtVisitor):
     def __init__(self) -> None:
         self.globals = Environment()
-        self.environment = self.globals
+        self.environment: Environment = self.globals
         self.locals: Dict[Token, int] = {}
 
         self.globals.define("clock", ClockCallable())
@@ -79,7 +79,19 @@ class Interpreter(ExprVisitor, StmtVisitor):
         print(self._stringify(value))
 
     def visit_class_stmt(self, stmt: ClassStmt):
+        superclass = None
+        if stmt.superclass is not None:
+            superclass = self._evaluate(stmt.superclass)
+            if not isinstance(superclass, LoxClass):
+                raise InterpreterRuntimeError(
+                    stmt.superclass.name, "Superclass must be a class."
+                )
+
         self.environment.define(stmt.name.lexeme, None)
+
+        if stmt.superclass is not None:
+            self.environment = Environment(enclosing_scope=self.environment)
+            self.environment.define("super", superclass)
 
         methods = {}
         for method in stmt.methods:
@@ -90,7 +102,11 @@ class Interpreter(ExprVisitor, StmtVisitor):
             )
             methods[method.name.lexeme] = function
 
-        kclass = LoxClass(name=stmt.name.lexeme, methods=methods)
+        kclass = LoxClass(name=stmt.name.lexeme, superclass=superclass, methods=methods)
+
+        if superclass is not None:
+            self.environment = self.environment.enclosing
+
         self.environment.assign(stmt.name, kclass)
 
     def visit_literal(self, expr: Literal) -> object:
@@ -142,7 +158,7 @@ class Interpreter(ExprVisitor, StmtVisitor):
         raise InterpreterRuntimeError(expr.name, "Only instances have properties.")
 
     def visit_set(self, expr: SetExpr):
-        obj: LoxInstance = self._evaluate(expr.object)
+        obj: LoxInstance | None = self._evaluate(expr.object)
 
         if not isinstance(obj, LoxInstance):
             raise InterpreterRuntimeError(expr.name, "Only instances have fields.")
@@ -230,6 +246,14 @@ class Interpreter(ExprVisitor, StmtVisitor):
         # Raise a custom exception to handle the return statement
         # This will allow us to jump through the call stack and return the value
         raise Return(value)
+
+    def visit_super(self, expr: Super):
+        distance = self.locals[expr]
+        superclass: Super = self.environment.get_at(distance, "super")
+
+        obj = self.environment.get_at(distance - 1, "this")
+        method = superclass.find_method(expr.method.lexeme)
+        return method.bind(obj)
 
     def _is_truthy(self, obj: object) -> bool:
         if obj is None:

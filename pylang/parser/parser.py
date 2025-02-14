@@ -29,13 +29,13 @@ class Parser:
     call           → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
     argumenst      → expression ( "," expression )* ;
     primary        → NUMBER | STRING | "true" | "false" | "nil"
-                | "(" expression ")" | IDENTIFIER ;
+                | "(" expression ")" | IDENTIFIER | "self" | "super" "." IDENTIFIER ;
     program        → declaration* EOF ;
     declaration    → classDecl
                 | funDecl
                 | varDecl
                 | statement ;
-    classDecl      → "class" IDENTIFIER "{" function* "}" ;
+    classDecl      → "class" IDENTIFIER (":" IDENTIFIER)? "{" function* "}" ;
     funDecl        → "def" function ;
     function       → IDENTIFIER "(" parameters? ")" block ;
     parameters     → IDENTIFIER ( "," IDENTIFIER )* ;
@@ -92,6 +92,12 @@ class Parser:
 
     def _class_declaration(self) -> Stmt:
         name = self._consume(TokenType.IDENTIFIER, "Expected class name.")
+        superclass: Variable | None = None
+
+        if self._match(TokenType.COLON):
+            self._consume(TokenType.IDENTIFIER, "Expect superclass name.")
+            superclass = Variable(self._previous())
+
         self._consume(TokenType.LEFT_BRACE, "Expect '{' before class body.")
 
         methods = []
@@ -102,7 +108,7 @@ class Parser:
             methods.append(self._funtion_declaration("method"))
 
         self._consume(TokenType.RIGHT_BRACE, "Expect '}' after class body.")
-        return ClassStmt(name=name, methods=methods)
+        return ClassStmt(name=name, superclass=superclass, methods=methods)
 
     def _funtion_declaration(self, kind: str) -> Stmt:
         name = self._consume(TokenType.IDENTIFIER, f"Expect {kind} name.")
@@ -382,6 +388,14 @@ class Parser:
 
         if self._match(TokenType.NUMBER, TokenType.STRING):
             return Literal(self._previous().literal)
+
+        if self._match(TokenType.SUPER):
+            keyword = self._previous()
+            self._consume(TokenType.DOT, "Expected '.' after 'super'.")
+            method = self._consume(
+                TokenType.IDENTIFIER, "Expected superclass method name."
+            )
+            return Super(keyword=keyword, method=method)
 
         if self._match(TokenType.SELF):
             return Self(keyword=self._previous())

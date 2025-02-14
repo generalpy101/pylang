@@ -51,6 +51,10 @@ class ExprVisitor(ABC):
     def visit_self(self, expr: "Self"):
         pass
 
+    @abstractmethod
+    def visit_super(self, expr: "Super"):
+        pass
+
 
 # Base Expr class
 class Expr(ABC):
@@ -159,3 +163,12 @@ class Self(Expr):
 
     def accept(self, visitor: ExprVisitor):
         return visitor.visit_self(self)
+
+
+@dataclass(eq=False)
+class Super(Expr):
+    keyword: Token
+    method: Token
+
+    def accept(self, visitor: ExprVisitor):
+        return visitor.visit_super(self)

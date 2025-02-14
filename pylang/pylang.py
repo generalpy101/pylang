@@ -26,7 +26,7 @@ def run(source_code: str, is_repl: bool = False):
         resolver.resolve_statements(statements)
         interpreter.interpret(stmts=statements)
 
-    except (InterpreterRuntimeError, ResolverError) as e:
+    except (InterpreterRuntimeError, ResolverError):
         if not is_repl:
             exit(70)
 

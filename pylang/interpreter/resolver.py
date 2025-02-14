@@ -19,6 +19,7 @@ class FunctionType(Enum):
 class ClassType(Enum):
     NONE = "NONE"
     CLASS = "CLASS"
+    SUBCLASS = "SUBCLASS"
 
 
 class Resolver(ExprVisitor, StmtVisitor):
@@ -103,6 +104,22 @@ class Resolver(ExprVisitor, StmtVisitor):
         self._declare(stmt.name.lexeme)
         self._define(stmt.name.lexeme)
 
+        if (
+            stmt.superclass is not None
+            and stmt.name.lexeme == stmt.superclass.name.lexeme
+        ):
+            raise ResolverError(
+                stmt.superclass.name, "A class cannot inherit from itself"
+            )
+
+        if stmt.superclass is not None:
+            self.current_class = ClassType.SUBCLASS
+            self._resolve_expr(stmt.superclass)
+
+        if stmt.superclass is not None:
+            self._begin_scope()
+            self.scopes[-1]["super"] = True
+
         self._begin_scope()
         self.scopes[-1]["self"] = True
 
@@ -113,6 +130,10 @@ class Resolver(ExprVisitor, StmtVisitor):
             self._resolve_function(method, declaration)
 
         self._end_scope()
+
+        if stmt.superclass is not None:
+            self._end_scope()
+
         self.current_class = enclosing_class
 
     def visit_binary(self, expr: Binary):
@@ -149,6 +170,15 @@ class Resolver(ExprVisitor, StmtVisitor):
         if self.current_class == ClassType.NONE:
             raise ResolverError(expr.keyword, "Cannot use 'self' outside of a class")
 
+        self._resolve_local(expr, expr.keyword.lexeme)
+
+    def visit_super(self, expr: Super):
+        if self.current_class == ClassType.NONE:
+            raise ResolverError(expr.keyword, "Cannot use 'super' outside of a class")
+        elif self.current_class != ClassType.SUBCLASS:
+            raise ResolverError(
+                expr.keyword, "Cannot use 'super' in a class with no superclass"
+            )
         self._resolve_local(expr, expr.keyword.lexeme)
 
     def _declare(self, name: str):

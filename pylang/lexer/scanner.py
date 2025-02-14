@@ -69,6 +69,8 @@ class Scanner:
             self._add_token(TokenType.SEMICOLON)
         elif element == "*":
             self._add_token(TokenType.STAR)
+        elif element == ":":
+            self._add_token(TokenType.COLON)
         elif element == "!":
             self._add_token(
                 TokenType.BANG_EQUAL if self._match("=") else TokenType.BANG

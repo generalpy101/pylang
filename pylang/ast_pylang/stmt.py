@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from ast_pylang.expr import Expr
+from ast_pylang.expr import Expr, Variable
 from dataclasses import dataclass
 from typing import List
 
@@ -126,6 +126,9 @@ class ReturnStmt(Stmt):
 @dataclass
 class ClassStmt(Stmt):
     name: Token
+    superclass: (
+        Variable  # Superclass will be an variable in the scope so evaluate it as such
+    )
     methods: List[FunctionStmt]
 
     def accept(self, visitor: StmtVisitor):
