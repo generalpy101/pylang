@@ -50,7 +50,7 @@ def run_repl():
 if __name__ == "__main__":
     argument_length = len(sys.argv)
     if argument_length > 2:
-        print("Usage: python lox.py [script]")
+        print("Usage: python pylang.py [script]")
     elif argument_length == 2:
         run_file(file_path=sys.argv[1])
     else:

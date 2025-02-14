@@ -13,52 +13,6 @@ class ParserError(Exception):
 
 
 class Parser:
-    """
-    Parser for the lox language
-    Grammar used is:
-    expression     → assignment ;
-    assignment     → (call ".")? IDENTIFIER "=" assignment
-                | logic_or ;
-    logic_or       → logic_and ( "or" logic_and )* ;
-    logic_and      → equality ( "and" equality )* ;
-    equality       → comparison ( ( "!=" | "==" ) comparison )* ;
-    comparison     → term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
-    term           → factor ( ( "-" | "+" ) factor )* ;
-    factor         → unary ( ( "/" | "*" ) unary )* ;
-    unary          → ( "!" | "-" ) unary | call ;
-    call           → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
-    argumenst      → expression ( "," expression )* ;
-    primary        → NUMBER | STRING | "true" | "false" | "nil"
-                | "(" expression ")" | IDENTIFIER | "self" | "super" "." IDENTIFIER ;
-    program        → declaration* EOF ;
-    declaration    → classDecl
-                | funDecl
-                | varDecl
-                | statement ;
-    classDecl      → "class" IDENTIFIER (":" IDENTIFIER)? "{" function* "}" ;
-    funDecl        → "def" function ;
-    function       → IDENTIFIER "(" parameters? ")" block ;
-    parameters     → IDENTIFIER ( "," IDENTIFIER )* ;
-    statement      → exprStmt
-               | forStmt
-               | ifStmt
-               | printStmt
-               | returnStmt
-               | whileStmt
-               | block ;
-    returnStmt     → "return" expression? ";" ;
-    forStmt        → "for" "(" ( varDecl | exprStmt | ";" )
-                    expression? ";"
-                    expression? ")" statement ;
-    whileStmt      → "while" "(" expression ")" statement ;
-    ifStmt         → "if" "(" expression ")" statement
-                ( "else" statement )? ;
-    block          → "{" declaration* "}" ;
-    varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
-    exprStmt       → expression ";" ;
-    printStmt      → "print" expression ";" ;
-    """
-
     def __init__(self, tokens: List[Token]) -> None:
         self.tokens = tokens
         self.current = 0

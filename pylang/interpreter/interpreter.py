@@ -1,13 +1,12 @@
-import time
 from ast_pylang.expr import *
 from ast_pylang.stmt import *
 from typing import Dict, List
 
 from interpreter.callable import Callable
 from interpreter.environment import Environment
-from interpreter.lox_class import LoxClass
-from interpreter.lox_function import LoxFunction
-from interpreter.lox_instance import LoxInstance
+from interpreter.pylang_class import PylangClass
+from interpreter.pylang_function import PylangFunction
+from interpreter.pylang_instance import PylangInstance
 from lexer.token_type import TokenType
 from lexer.tokens import Token
 from stdlib.builtins import ClockCallable
@@ -82,7 +81,7 @@ class Interpreter(ExprVisitor, StmtVisitor):
         superclass = None
         if stmt.superclass is not None:
             superclass = self._evaluate(stmt.superclass)
-            if not isinstance(superclass, LoxClass):
+            if not isinstance(superclass, PylangClass):
                 raise InterpreterRuntimeError(
                     stmt.superclass.name, "Superclass must be a class."
                 )
@@ -95,14 +94,14 @@ class Interpreter(ExprVisitor, StmtVisitor):
 
         methods = {}
         for method in stmt.methods:
-            function = LoxFunction(
+            function = PylangFunction(
                 declaration=method,
                 closure=self.environment,
                 is_initializer=(method.name.lexeme == "init"),
             )
             methods[method.name.lexeme] = function
 
-        kclass = LoxClass(name=stmt.name.lexeme, superclass=superclass, methods=methods)
+        kclass = PylangClass(name=stmt.name.lexeme, superclass=superclass, methods=methods)
 
         if superclass is not None:
             self.environment = self.environment.enclosing
@@ -151,16 +150,16 @@ class Interpreter(ExprVisitor, StmtVisitor):
         return self._look_up_variable(expr.name, expr)
 
     def visit_get(self, expr: Get):
-        obj: LoxInstance = self._evaluate(expr.object)
-        if isinstance(obj, LoxInstance):
+        obj: PylangInstance = self._evaluate(expr.object)
+        if isinstance(obj, PylangInstance):
             return obj.get(expr.name)
 
         raise InterpreterRuntimeError(expr.name, "Only instances have properties.")
 
     def visit_set(self, expr: SetExpr):
-        obj: LoxInstance | None = self._evaluate(expr.object)
+        obj: PylangInstance | None = self._evaluate(expr.object)
 
-        if not isinstance(obj, LoxInstance):
+        if not isinstance(obj, PylangInstance):
             raise InterpreterRuntimeError(expr.name, "Only instances have fields.")
 
         value = self._evaluate(expr.value)
@@ -232,7 +231,7 @@ class Interpreter(ExprVisitor, StmtVisitor):
         return callee.call(self, arguments)
 
     def visit_function_stmt(self, expr):
-        function = LoxFunction(
+        function = PylangFunction(
             declaration=expr, closure=self.environment, is_initializer=False
         )
         self.environment.define(expr.name.lexeme, function)

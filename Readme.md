@@ -117,7 +117,30 @@ PyLang supports a subset of the Lox language syntax, including:
 - **Functions:** `def myFunction() { return 42; }`
 - **Closures:** First-class functions with lexical scoping
 - **Print Statement:** `print "Hello, world!";`
-- 
+- **Classes and Inheritance:**:
+
+```
+class Animal {
+    speak() {
+        print "Animal sound";
+    }
+}
+
+class Dog: Animal {
+    // Constructor
+    init(name) {
+        self.name = name;
+    }
+    speak() {
+        super.speak();
+        print "Woof! My name is " + self.name;
+    }
+}
+
+var myDog = Dog("Tommy");
+myDog.speak(); // Outputs: "Woof!"
+```
+
 For a complete list of supported syntax, refer to the [Lox Grammar](https://craftinginterpreters.com/appendix-i.html).
 
 

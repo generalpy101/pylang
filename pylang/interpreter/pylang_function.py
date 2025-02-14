@@ -6,7 +6,7 @@ from interpreter.environment import Environment
 from utils.errors import Return
 
 
-class LoxFunction(Callable):
+class PylangFunction(Callable):
     def __init__(
         self, declaration: FunctionStmt, closure: Environment, is_initializer: bool
     ):
@@ -35,10 +35,10 @@ class LoxFunction(Callable):
     def arity(self):
         return len(self.declaration.params)
 
-    def bind(self, instance: "LoxInstance"):
+    def bind(self, instance: "PylangInstance"):
         environment = Environment(enclosing_scope=self.closure)
         environment.define("self", instance)
-        return LoxFunction(self.declaration, environment, self.is_initializer)
+        return PylangFunction(self.declaration, environment, self.is_initializer)
 
     def __str__(self):
         return f"<fn>{self.declaration.name.lexeme}"

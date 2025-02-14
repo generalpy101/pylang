@@ -2,7 +2,7 @@ from lexer.tokens import Token
 from utils.errors import InterpreterRuntimeError
 
 
-class LoxInstance:
+class PylangInstance:
     def __init__(self, klass: "LoxClass"):
         self.klass = klass
         self.fields = {}
