@@ -11,7 +11,9 @@ STRING_IDENTIFIERS = ['"']
 VALID_IDENTIFIER_CHARACTERS = string.ascii_lowercase + string.ascii_uppercase + "_"
 KEYWORDS = {
     "and": TokenType.AND,
+    "break": TokenType.BREAK,
     "class": TokenType.CLASS,
+    "continue": TokenType.CONTINUE,
     "else": TokenType.ELSE,
     "false": TokenType.FALSE,
     "for": TokenType.FOR,

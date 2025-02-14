@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
-from ast_pylang.expr import Expr, Variable
 from dataclasses import dataclass
 from typing import List
 
+from ast_pylang.expr import Expr, Variable
 from lexer.tokens import Token
 
 
@@ -42,6 +42,14 @@ class StmtVisitor(ABC):
 
     @abstractmethod
     def visit_class_stmt(self, stmt: "ClassStmt"):
+        pass
+
+    @abstractmethod
+    def visit_break_stmt(self, stmt: "BreakStmt"):
+        pass
+
+    @abstractmethod
+    def visit_continue_stmt(self, stmt: "ContinueStmt"):
         pass
 
 
@@ -133,3 +141,19 @@ class ClassStmt(Stmt):
 
     def accept(self, visitor: StmtVisitor):
         return visitor.visit_class_stmt(self)
+
+
+@dataclass
+class BreakStmt(Stmt):
+    keyword: Token
+
+    def accept(self, visitor: StmtVisitor):
+        return visitor.visit_break_stmt(self)
+
+
+@dataclass
+class ContinueStmt(Stmt):
+    keyword: Token
+
+    def accept(self, visitor: StmtVisitor):
+        return visitor.visit_continue_stmt(self)

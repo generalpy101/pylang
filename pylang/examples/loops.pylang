@@ -1,0 +1,15 @@
+var i = 0;
+
+while (i < 10) {
+    if (i == 2) {
+        i = i + 1;
+        print ("skipping 2");
+        continue;
+    }
+    if (i == 5) {
+        print ("breaking at 5");
+        break;
+    }
+    print(i);
+    i = i + 1;
+}

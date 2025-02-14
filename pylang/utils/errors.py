@@ -29,3 +29,15 @@ class Return(Exception):
     def __init__(self, value: object) -> None:
         self.value = value
         super().__init__(value)
+
+
+class Break(Exception):
+    def __init__(self, token: Token) -> None:
+        self.token = token
+        super().__init__(token)
+
+
+class Continue(Exception):
+    def __init__(self, token: Token) -> None:
+        self.token = token
+        super().__init__(token)

@@ -1,7 +1,7 @@
-from ast_pylang.expr import *
-from ast_pylang.stmt import *
 from typing import Dict, List
 
+from ast_pylang.expr import *
+from ast_pylang.stmt import *
 from interpreter.callable import Callable
 from interpreter.environment import Environment
 from interpreter.pylang_class import PylangClass
@@ -10,7 +10,7 @@ from interpreter.pylang_instance import PylangInstance
 from lexer.token_type import TokenType
 from lexer.tokens import Token
 from stdlib.builtins import ClockCallable
-from utils.errors import ErrorType, InterpreterRuntimeError, Return
+from utils.errors import Break, Continue, ErrorType, InterpreterRuntimeError, Return
 from utils.logger import Logger
 
 
@@ -30,6 +30,22 @@ class Interpreter(ExprVisitor, StmtVisitor):
             Logger.error(ErrorType.RuntimeError, e.token.line, e.message)
             # Raise the error to the caller to exit the program
             raise e
+        except Break as e:
+            Logger.error(
+                ErrorType.RuntimeError, e.token.line, "Break statement outside of loop."
+            )
+            # Return the error to the caller to exit the program
+            raise InterpreterRuntimeError(e.token, "Break statement outside of loop.")
+        except Continue as e:
+            Logger.error(
+                ErrorType.RuntimeError,
+                e.token.line,
+                "Continue statement outside of loop.",
+            )
+            # Return the error to the caller to exit the program
+            raise InterpreterRuntimeError(
+                e.token, "Continue statement outside of loop."
+            )
 
     def resolve(self, expr: Expr, depth: int):
         self.locals[expr] = depth
@@ -101,7 +117,9 @@ class Interpreter(ExprVisitor, StmtVisitor):
             )
             methods[method.name.lexeme] = function
 
-        kclass = PylangClass(name=stmt.name.lexeme, superclass=superclass, methods=methods)
+        kclass = PylangClass(
+            name=stmt.name.lexeme, superclass=superclass, methods=methods
+        )
 
         if superclass is not None:
             self.environment = self.environment.enclosing
@@ -142,9 +160,24 @@ class Interpreter(ExprVisitor, StmtVisitor):
 
     def visit_while_stmt(self, expr: WhileStmt):
         while self._is_truthy(self._evaluate(expr.condition)):
-            self._execute(expr.body)
+            try:
+                self._execute(expr.body)
+            except Break:
+                break
+            except Continue:
+                continue
 
         return None
+
+    def visit_break_stmt(self, stmt: BreakStmt):
+        # Raise a custom exception to handle the break statement
+        # This will allow us to jump through the call stack and return the value
+        raise Break(token=stmt.keyword)
+
+    def visit_continue_stmt(self, stmt: ContinueStmt):
+        # Raise a custom exception to handle the continue statement
+        # This will allow us to jump through the call stack and return the value
+        raise Continue(token=stmt.keyword)
 
     def visit_variable(self, expr: Variable):
         return self._look_up_variable(expr.name, expr)

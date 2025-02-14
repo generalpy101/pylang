@@ -34,6 +34,7 @@ class TokenType(Enum):
     # Keywords
     AND = "AND"
     CLASS = "CLASS"
+    CONTINUE = "CONTINUE"
     ELSE = "ELSE"
     FALSE = "FALSE"
     DEF = "DEF"
@@ -48,5 +49,6 @@ class TokenType(Enum):
     TRUE = "TRUE"
     VAR = "VAR"
     WHILE = "WHILE"
+    BREAK = "BREAK"
 
     EOF = "EOF"

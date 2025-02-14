@@ -1,7 +1,7 @@
-from ast_pylang.expr import *
-from ast_pylang.stmt import *
 from typing import List
 
+from ast_pylang.expr import *
+from ast_pylang.stmt import *
 from lexer.token_type import TokenType
 from lexer.tokens import Token
 from utils.errors import ErrorType
@@ -113,6 +113,8 @@ class Parser:
             return self._return_statement()
         if self._match(TokenType.WHILE):
             return self._while_statement()
+        if self._match(TokenType.BREAK) or self._match(TokenType.CONTINUE):
+            return self._break_continue_statement()
         if self._match(TokenType.LEFT_BRACE):
             return BlockStmt(statements=self._block())
         return self._expression_statement()
@@ -200,6 +202,19 @@ class Parser:
 
         body = self._statement()
         return WhileStmt(condition=condition, body=body)
+
+    def _break_continue_statement(self) -> Stmt:
+        keyword = self._previous()
+        stmt = None
+
+        if keyword.token_type == TokenType.BREAK:
+            stmt = BreakStmt(keyword=keyword)
+        elif keyword.token_type == TokenType.CONTINUE:
+            stmt = ContinueStmt(keyword=keyword)
+
+        self._consume(TokenType.SEMICOLON, "Expect ';' after break/continue statement.")
+
+        return stmt
 
     def _expression_statement(self) -> Stmt:
         value = self._expression()

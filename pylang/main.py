@@ -1,8 +1,8 @@
 import sys
-from ast_pylang.stmt import Stmt
 from parser.parser import Parser
 from typing import List
 
+from ast_pylang.stmt import Stmt
 from interpreter.interpreter import Interpreter, InterpreterRuntimeError
 from interpreter.resolver import Resolver, ResolverError
 from lexer.scanner import Scanner

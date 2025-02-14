@@ -1,6 +1,6 @@
-from ast_pylang.stmt import FunctionStmt
 from typing import List
 
+from ast_pylang.stmt import FunctionStmt
 from interpreter.callable import Callable
 from interpreter.environment import Environment
 from utils.errors import Return

@@ -123,6 +123,7 @@ def main():
             "ReturnStmt": (("keyword", "Token"), ("value", "Expr")),
             "VarStmt": (("name", "Token"), ("initializer", "Expr")),
             "WhileStmt": (("condition", "Expr"), ("body", "Stmt")),
+            "BreakStmt": (("keyword", "Token"),),
         },
     )
 

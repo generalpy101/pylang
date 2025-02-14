@@ -1,10 +1,9 @@
-from ast_pylang.expr import *
-from ast_pylang.stmt import *
 from enum import Enum
 from typing import Dict, List
 
+from ast_pylang.expr import *
+from ast_pylang.stmt import *
 from interpreter.interpreter import Interpreter
-from lexer.tokens import Token
 from utils.errors import ResolverError
 from utils.logger import Logger
 
@@ -135,6 +134,12 @@ class Resolver(ExprVisitor, StmtVisitor):
             self._end_scope()
 
         self.current_class = enclosing_class
+
+    def visit_break_stmt(self, stmt: BreakStmt):
+        pass
+
+    def visit_continue_stmt(self, stmt: ContinueStmt):
+        pass
 
     def visit_binary(self, expr: Binary):
         self._resolve_expr(expr.left)
