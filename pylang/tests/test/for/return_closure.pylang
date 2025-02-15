@@ -1,0 +1,10 @@
+def f() {
+  for (;;) {
+    var i = "i";
+    def g() { print i; }
+    return g;
+  }
+}
+
+var h = f();
+h(); // expect: i

@@ -1,0 +1,2 @@
+SyntaxError on 260: Cannot have more than 255 arguments.
+RuntimeError on 260: Expected 0 arguments but got 256.

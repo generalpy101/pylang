@@ -7,6 +7,8 @@ from utils.errors import Return
 
 
 class PylangFunction(Callable):
+    __slots__ = ("declaration", "closure", "is_initializer")
+
     def __init__(
         self, declaration: FunctionStmt, closure: Environment, is_initializer: bool
     ):

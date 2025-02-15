@@ -383,7 +383,7 @@ class Parser:
         if self._match(TokenType.IDENTIFIER):
             return Variable(self._previous())
 
-        Logger.error(ErrorType.SyntaxError, self._peek().line, "Expected expression.")
+        self._error(self._peek(), "Expected expression.")
 
     def _consume(self, token_type: TokenType, message: str) -> Token:
         if self._match(token_type):

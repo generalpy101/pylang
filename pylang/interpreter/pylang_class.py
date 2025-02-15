@@ -6,6 +6,8 @@ from interpreter.pylang_instance import PylangInstance
 
 
 class PylangClass(Callable):
+    __slots__ = ("name", "methods", "superclass")
+
     def __init__(
         self, name: str, superclass: "PylangClass", methods: Dict[str, PylangFunction]
     ):

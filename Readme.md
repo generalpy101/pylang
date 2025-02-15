@@ -70,21 +70,18 @@ python pylang.py [script.pylang]
 
 ## Examples
 
-### Closure Example:
+### Fizzbuzz
 
 ```lox
-def makeCounter() {
-    var count = 0;
-    def increment() {
-        count = count + 1;
-        print count;
+for (var i = 1; i <= 100; i = i + 1) {
+    if (i % 3 == 0) {
+        print "Fizz";
+    } else if (i % 5 == 0) {
+        print "Buzz";
+    } else {
+        print i;
     }
-    return increment;
 }
-
-var counter = makeCounter();
-counter(); // Outputs: 1
-counter(); // Outputs: 2
 ```
 
 ### Recursive Fibonacci:
@@ -101,9 +98,8 @@ print fib(10); // Outputs: 55
 To run an example:
 
 ```bash
-python pylang.py examples/closure.pylang
+python pylang/main.py examples/closure.pylang
 ```
-
 
 ## Supported Syntax
 
@@ -141,8 +137,11 @@ var myDog = Dog("Tommy");
 myDog.speak(); // Outputs: "Woof!"
 ```
 
-For a complete list of supported syntax, refer to the [Lox Grammar](https://craftinginterpreters.com/appendix-i.html).
+## Major Differences from Lox:
 
+- **Use of different keywords:** `def` instead of `fun`, `self` instead of `this`.
+- **break and continue statements:** This were not supported in author's implementation but are supported in this implementation (this was present as a challenge in the book).
+- **Classes and Inheritance:** For inheritance, token `:` is used instead of `<`. So `class Dog: Animal` instead of `class Dog < Animal`.
 
 ## Contributing
 
@@ -154,7 +153,18 @@ Contributions are welcome! If you have suggestions or improvements, please open 
 4. Push to the branch: `git push origin feature-name`.
 5. Open a pull request.
 
-## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+## Testing
 
+Custom python scripts are provided in the `tests` directory to test the interpreter. To run the tests:
+
+```bash
+python tests/test.py
+```
+
+**Note:** The test suite used is from author's original implementation. Find more details in the [original repository](https://github.com/munificent/craftinginterpreters/) by Robert Nystrom (check the `test` directory).
+
+### To add new tests:
+
+- Add a new `.pylang` file in the `tests` directory.
+- Generate its expected output by running the script `update_output_files.py`.

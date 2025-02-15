@@ -1,0 +1,2 @@
+SyntaxError on 259: Cannot have more than 255 arguments.
+RuntimeError on 3: Only instances have properties.

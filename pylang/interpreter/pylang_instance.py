@@ -3,7 +3,9 @@ from utils.errors import InterpreterRuntimeError
 
 
 class PylangInstance:
-    def __init__(self, klass: "LoxClass"):
+    __slots__ = ("klass", "fields")
+
+    def __init__(self, klass: "PylangClass"):
         self.klass = klass
         self.fields = {}
 

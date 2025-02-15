@@ -23,9 +23,10 @@ class Interpreter(ExprVisitor, StmtVisitor):
         self.globals.define("clock", ClockCallable())
 
     def interpret(self, stmts: List[Stmt]) -> None:
+        _execute = self._execute
         try:
             for statement in stmts:
-                self._execute(statement)
+                _execute(statement)
         except InterpreterRuntimeError as e:
             Logger.error(ErrorType.RuntimeError, e.token.line, e.message)
             # Raise the error to the caller to exit the program
@@ -45,6 +46,17 @@ class Interpreter(ExprVisitor, StmtVisitor):
             # Return the error to the caller to exit the program
             raise InterpreterRuntimeError(
                 e.token, "Continue statement outside of loop."
+            )
+        except RecursionError as e:
+            Logger.error(
+                ErrorType.RuntimeError,
+                0,
+                "Stack overflow.",
+            )
+            # Raise as InterpreterRuntimeError to handle the error
+            # Set token as first token in the file
+            raise InterpreterRuntimeError(
+                Token(TokenType.EOF, "", None, 0), "Stack overflow."
             )
 
     def resolve(self, expr: Expr, depth: int):
@@ -224,6 +236,10 @@ class Interpreter(ExprVisitor, StmtVisitor):
             return float(left) * float(right)
         elif expr.operator.token_type == TokenType.SLASH:
             self._check_number_operands(expr.operator, left, right)
+            if right == 0:
+                raise InterpreterRuntimeError(
+                    expr.operator, "Division by zero is not allowed."
+                )
             return float(left) / float(right)
         # Comparison
         # These operators are only defined for numbers for now
@@ -285,6 +301,12 @@ class Interpreter(ExprVisitor, StmtVisitor):
 
         obj = self.environment.get_at(distance - 1, "this")
         method = superclass.find_method(expr.method.lexeme)
+
+        if method is None:
+            raise InterpreterRuntimeError(
+                expr.method, f"Undefined property '{expr.method.lexeme}'."
+            )
+
         return method.bind(obj)
 
     def _is_truthy(self, obj: object) -> bool:

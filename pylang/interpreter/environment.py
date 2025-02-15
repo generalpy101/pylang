@@ -3,6 +3,8 @@ from utils.errors import InterpreterRuntimeError
 
 
 class Environment:
+    __slots__ = ("values", "enclosing")
+
     def __init__(self, enclosing_scope: "Environment" = None) -> None:
         self.values = {}
         self.enclosing = enclosing_scope  # For scoping
@@ -17,7 +19,7 @@ class Environment:
 
         # If not in current scope, check enclosing scope
         if self.enclosing is not None:
-            self.enclosing.assign(name, value)
+            self.enclosing.assign(name.lexeme, value)
             return
 
         raise InterpreterRuntimeError(name, f"Undefined variable '{name.lexeme}'.")
@@ -31,7 +33,7 @@ class Environment:
 
         # If not in current scope, check enclosing scope
         if self.enclosing is not None:
-            return self.enclosing.get(name)
+            return self.enclosing.get(name.lexeme)
         raise InterpreterRuntimeError(name, f"Undefined variable '{name.lexeme}'.")
 
     def get_at(self, distance: int, name: str) -> object:

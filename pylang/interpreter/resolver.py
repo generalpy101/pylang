@@ -38,13 +38,16 @@ class Resolver(ExprVisitor, StmtVisitor):
                 )
                 raise e
 
+    def _error(self, token: Token, message: str):
+        raise ResolverError(token, message)
+
     def visit_block_stmt(self, stmt: BlockStmt):
         self._begin_scope()
         self.resolve_statements(statements=stmt.statements)
         self._end_scope()
 
     def visit_var_stmt(self, stmt: VarStmt):
-        self._declare(stmt.name.lexeme)
+        self._declare(stmt.name.lexeme, stmt.name)
         if stmt.initializer is not None:
             self._resolve_expr(stmt.initializer)
         self._define(stmt.name.lexeme)
@@ -53,9 +56,8 @@ class Resolver(ExprVisitor, StmtVisitor):
         if len(self.scopes) > 0:
             exists_in_current_scope = self.scopes[-1].get(expr.name.lexeme)
             if exists_in_current_scope is False:
-                raise ResolverError(
-                    token=expr.name,
-                    message=f"Cannot read local variable in its own initializer",
+                self._error(
+                    expr.name, f"Cannot read local variable in its own initializer"
                 )
 
         self._resolve_local(expr, expr.name.lexeme)
@@ -65,7 +67,7 @@ class Resolver(ExprVisitor, StmtVisitor):
         self._resolve_local(expr, expr.name.lexeme)
 
     def visit_function_stmt(self, stmt: FunctionStmt):
-        self._declare(stmt.name.lexeme)
+        self._declare(stmt.name.lexeme, stmt.name)
         self._define(stmt.name.lexeme)
 
         self._resolve_function(stmt, FunctionType.FUNCTION)
@@ -84,13 +86,11 @@ class Resolver(ExprVisitor, StmtVisitor):
 
     def visit_return_stmt(self, stmt: ReturnStmt):
         if self.current_function == FunctionType.NONE:
-            raise ResolverError(stmt.keyword, "Cannot return from top-level code")
+            self._error(stmt.keyword, "Cannot return from top-level code")
 
         if stmt.value is not None:
             if self.current_function == FunctionType.INITIALIZER:
-                raise ResolverError(
-                    stmt.keyword, "Cannot return a value from an initializer"
-                )
+                self._error(stmt.keyword, "Cannot return a value from an initializer")
             self._resolve_expr(stmt.value)
 
     def visit_while_stmt(self, stmt: WhileStmt):
@@ -100,16 +100,14 @@ class Resolver(ExprVisitor, StmtVisitor):
     def visit_class_stmt(self, stmt: ClassStmt):
         enclosing_class = self.current_class
         self.current_class = ClassType.CLASS
-        self._declare(stmt.name.lexeme)
+        self._declare(stmt.name.lexeme, stmt.name)
         self._define(stmt.name.lexeme)
 
         if (
             stmt.superclass is not None
             and stmt.name.lexeme == stmt.superclass.name.lexeme
         ):
-            raise ResolverError(
-                stmt.superclass.name, "A class cannot inherit from itself"
-            )
+            self._error(stmt.superclass.name, "A class cannot inherit from itself")
 
         if stmt.superclass is not None:
             self.current_class = ClassType.SUBCLASS
@@ -173,25 +171,27 @@ class Resolver(ExprVisitor, StmtVisitor):
 
     def visit_self(self, expr: Self):
         if self.current_class == ClassType.NONE:
-            raise ResolverError(expr.keyword, "Cannot use 'self' outside of a class")
+            self._error(expr.keyword, "Cannot use 'self' outside of a class")
 
         self._resolve_local(expr, expr.keyword.lexeme)
 
     def visit_super(self, expr: Super):
         if self.current_class == ClassType.NONE:
-            raise ResolverError(expr.keyword, "Cannot use 'super' outside of a class")
+            self._error(expr.keyword, "Cannot use 'super' outside of a class")
         elif self.current_class != ClassType.SUBCLASS:
-            raise ResolverError(
+            self._error(
                 expr.keyword, "Cannot use 'super' in a class with no superclass"
             )
         self._resolve_local(expr, expr.keyword.lexeme)
 
-    def _declare(self, name: str):
+    def _declare(self, name: str, token: Token):
         if len(self.scopes) == 0:
             return
         scope = self.scopes[-1]
         if name in scope:
-            raise Exception(f"Variable with name {name} already declared in this scope")
+            self._error(
+                token, f"Variable with name: {name} already declared in this scope"
+            )
         scope[name] = False
 
     def _define(self, name: str):
@@ -217,7 +217,7 @@ class Resolver(ExprVisitor, StmtVisitor):
         self.current_function = type
         self._begin_scope()
         for param in function.params:
-            self._declare(param.lexeme)
+            self._declare(param.lexeme, param)
             self._define(param.lexeme)
 
         self.resolve_statements(function.body)

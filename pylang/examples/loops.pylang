@@ -13,3 +13,12 @@ while (i < 10) {
     print(i);
     i = i + 1;
 }
+
+for (var j = 0; j < 10; j = j + 1) {
+    // Break at 5
+    if (j == 5) {
+        print ("breaking at 5");
+        break;
+    }
+    print(j);
+}
