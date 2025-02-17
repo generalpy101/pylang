@@ -1,5 +1,6 @@
-import subprocess
 import os
+import subprocess
+
 from rich.console import Console
 from rich.progress import track
 

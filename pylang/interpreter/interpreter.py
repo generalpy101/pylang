@@ -10,7 +10,8 @@ from interpreter.pylang_instance import PylangInstance
 from lexer.token_type import TokenType
 from lexer.tokens import Token
 from stdlib.builtins import ClockCallable
-from utils.errors import Break, Continue, ErrorType, InterpreterRuntimeError, Return
+from utils.errors import (Break, Continue, ErrorType, InterpreterRuntimeError,
+                          Return)
 from utils.logger import Logger
 
 
@@ -157,6 +158,11 @@ class Interpreter(ExprVisitor, StmtVisitor):
 
     def visit_self(self, expr: Self):
         return self._look_up_variable(expr.keyword, expr)
+
+    def visit_function_expr(self, expr: FunctionExpr):
+        return PylangFunction(
+            declaration=expr, closure=self.environment, is_initializer=False
+        )
 
     def visit_logical(self, expr: Logical):
         left = self._evaluate(expr.left)

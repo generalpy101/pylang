@@ -1,6 +1,7 @@
-import subprocess
-import os
 import difflib
+import os
+import subprocess
+
 from rich.console import Console
 from rich.text import Text
 

@@ -86,6 +86,10 @@ def main():
                 ("paren", "Token"),
                 ("arguments", "List[Expr]"),
             ),
+            "FunctionExpr": (
+                ("params", "List[Token]"),
+                ("body", "List[Stmt]"),
+            ),  # For anonymous functions, statements exist for named functions
             "Get": (("object", "Expr"), ("name", "Token")),
             "Set": (("object", "Expr"), ("name", "Token"), ("value", "Expr")),
             "Grouping": (("expression", "Expr"),),

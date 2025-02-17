@@ -1,0 +1,15 @@
+var a = def (x) {
+    return x + 1;
+};
+
+print a(5);
+
+print def (x) {
+    return x + 1;
+}(5);
+
+def fn(x, callback) {
+    return callback(x);
+}
+
+print fn(10, a);

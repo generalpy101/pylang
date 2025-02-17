@@ -184,6 +184,10 @@ class Resolver(ExprVisitor, StmtVisitor):
             )
         self._resolve_local(expr, expr.keyword.lexeme)
 
+    def visit_function_expr(self, expr: FunctionExpr):
+        # Anonymous function will store its external scope in the closure
+        self._resolve_function(expr, FunctionType.FUNCTION)
+
     def _declare(self, name: str, token: Token):
         if len(self.scopes) == 0:
             return

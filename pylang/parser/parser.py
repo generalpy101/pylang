@@ -42,7 +42,11 @@ class Parser:
             if self._match(TokenType.CLASS):
                 return self._class_declaration()
             if self._match(TokenType.DEF):
-                return self._funtion_declaration("function")
+                # If next token is IDENTIFIER then it is a function declaration
+                if self._peek().token_type == TokenType.IDENTIFIER:
+                    return self._funtion_declaration("function")
+                # Else it is a function expression which means it is an anonymous function
+                return ExpressionStmt(expression=self._function_expr())
             if self._match(TokenType.VAR):
                 return self._var_declaration()
             return self._statement()
@@ -97,6 +101,35 @@ class Parser:
         self._consume(TokenType.LEFT_BRACE, f"Expect '{'{'}' before {kind} body.")
         body = self._block()
         return FunctionStmt(name=name, params=parameters, body=body)
+
+    def _function_expr(self) -> Expr:
+        # Since it is an anonymous function, it does not have a name
+        self._consume(TokenType.LEFT_PAREN, "Expect '(' after 'def'.")
+        parameters = []
+
+        if not self._peek().token_type == TokenType.RIGHT_PAREN:
+            parameters.append(
+                self._consume(TokenType.IDENTIFIER, "Expect parameter name.")
+            )
+            while self._match(TokenType.COMMA):
+                if len(parameters) >= 255:
+                    Logger.error(
+                        ErrorType.SyntaxError,
+                        self._peek().line,
+                        "Cannot have more than 255 parameters.",
+                    )
+                parameters.append(
+                    self._consume(TokenType.IDENTIFIER, "Expect parameter name.")
+                )
+
+        self._consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.")
+        self._consume(TokenType.LEFT_BRACE, "Expect '{' before function body.")
+
+        body = self._block()
+
+        return FunctionExpr(
+            params=parameters, body=body
+        )  # Anonymous function expression
 
     def _var_declaration(self) -> Stmt:
         name = self._consume(TokenType.IDENTIFIER, "Expected variable name.")
@@ -379,6 +412,10 @@ class Parser:
             expr = self._expression()
             self._consume(TokenType.RIGHT_PAREN, "Expect ')' after expression.")
             return expr
+
+        if self._match(TokenType.DEF):
+            # If next token is def it is an anonymous function
+            return self._function_expr()
 
         if self._match(TokenType.IDENTIFIER):
             return Variable(self._previous())

@@ -43,4 +43,6 @@ class PylangFunction(Callable):
         return PylangFunction(self.declaration, environment, self.is_initializer)
 
     def __str__(self):
+        if hasattr(self.declaration, "name") is False:
+            return f"<anonymous function> ({self.arity()} args)"
         return f"<fn>{self.declaration.name.lexeme}"
